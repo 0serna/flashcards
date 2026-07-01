@@ -10,7 +10,6 @@
 - [x] Mobile-first responsive UI
 - [x] Web App Manifest
 - [ ] Service Worker
-- [ ] Serwist
 
 ## UI
 
@@ -20,8 +19,8 @@
 
 ## Backend
 
-- [ ] Next.js Server Actions
-- [ ] Next.js Route Handlers
+- [x] Next.js Server Actions
+- [x] Next.js Route Handlers
 
 ## Base de datos
 
@@ -30,17 +29,17 @@
 
 ## Autenticación
 
-- [ ] Supabase Auth
+- [x] Supabase Auth
 
 ## Formularios y validación
 
 - [ ] React Hook Form
-- [ ] Zod
+- [x] Zod
 
 ## Estado y datos
 
 - [x] Server Components
-- [ ] Server Actions
+- [x] Server Actions
 - [ ] TanStack Query
 
 ## Deploy
