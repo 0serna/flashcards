@@ -1,0 +1,25 @@
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Flashcards",
+  description: "A mobile-first flashcards PWA for spaced repetition study.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+        {children}
+      </body>
+    </html>
+  );
+}
