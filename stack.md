@@ -14,8 +14,8 @@
 ## UI
 
 - [x] Tailwind CSS
-- [ ] shadcn/ui
-- [ ] Lucide Icons
+- [x] shadcn/ui
+- [x] Lucide Icons
 
 ## Backend
 
