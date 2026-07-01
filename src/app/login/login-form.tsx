@@ -31,6 +31,7 @@ export function LoginForm() {
 
   const emailError =
     state.status === "error" ? state.fieldErrors?.email?.[0] : undefined;
+  const emailErrorId = emailError ? "email-error" : undefined;
 
   return (
     <form action={action} className="flex w-full max-w-sm flex-col gap-4">
@@ -51,14 +52,24 @@ export function LoginForm() {
           required
           disabled={pending}
           placeholder="you@example.com"
+          aria-invalid={emailError ? "true" : undefined}
+          aria-describedby={emailErrorId}
         />
         {emailError ? (
-          <p className="text-sm text-destructive">{emailError}</p>
+          <p
+            id={emailErrorId}
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {emailError}
+          </p>
         ) : null}
       </div>
 
       {state.status === "error" && !emailError ? (
-        <p className="text-sm text-destructive">{state.message}</p>
+        <p role="alert" className="text-sm text-destructive">
+          {state.message}
+        </p>
       ) : null}
 
       <Button type="submit" disabled={pending} className="w-full">

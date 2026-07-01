@@ -36,12 +36,14 @@ describe("LoginForm", () => {
     expect(emailInput).toHaveAttribute("name", "email");
     expect(emailInput).toHaveAttribute("type", "email");
     expect(emailInput).toBeRequired();
+    expect(emailInput).toHaveClass("min-h-11");
 
     const submitButton = screen.getByRole("button", {
       name: /send magic link/i,
     });
     expect(submitButton).toBeInTheDocument();
     expect(submitButton).toHaveAttribute("type", "submit");
+    expect(submitButton).toHaveClass("min-h-11");
   });
 
   it("submits the email value to the server action and shows the success message", async () => {
@@ -63,7 +65,7 @@ describe("LoginForm", () => {
     });
   });
 
-  it("shows the email field error returned by the action", async () => {
+  it("associates the email field error with the input", async () => {
     requestMagicLinkMock.mockResolvedValue({
       status: "error",
       message: "We could not send the Magic Link right now. Please try again.",
@@ -77,11 +79,14 @@ describe("LoginForm", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /send magic link/i }));
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/please enter a valid email address/i),
-      ).toBeInTheDocument();
-    });
+    const emailInput = screen.getByLabelText(/email/i);
+    const emailError = await screen.findByRole("alert");
+
+    expect(emailError).toHaveTextContent(/please enter a valid email address/i);
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
+    expect(emailInput).toHaveAccessibleDescription(
+      "Please enter a valid email address.",
+    );
   });
 
   it("shows the fallback error message when the action returns a general error", async () => {

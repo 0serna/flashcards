@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { appBackgroundColor, appThemeColor } from "./theme-colors";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -7,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "A mobile-first flashcards PWA for spaced repetition study.",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#0a0a0a",
+    background_color: appBackgroundColor,
+    theme_color: appThemeColor,
     icons: [
       {
         src: "/icon-192.png",
