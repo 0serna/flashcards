@@ -6,12 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check": "node scripts/check.mjs",
+    "typecheck": "tsc --noEmit --pretty false",
+    "format": "prettier --write . --ignore-unknown",
+    "test": "vitest run",
+    "prepare": "husky"
   },
   "dependencies": {
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs,json,css,md}": "prettier --write --ignore-unknown",
+    "*.{js,jsx,ts,tsx,mjs,cjs}": "eslint --fix"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,7 +29,12 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }
