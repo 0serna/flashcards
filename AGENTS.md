@@ -26,6 +26,11 @@
 
 - Always use the `TDD` skill when implementing new features or fixing bugs/issues.
 
+## Design Context
+
+- Product strategy lives in `PRODUCT.md`; default register is `product`.
+- Visual system lives in `DESIGN.md`; follow “The Quiet Study Desk”: restrained, mobile-first, calm, and non-gamified.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -7,6 +7,11 @@ const checks = [
     args: ["run", "lint", "--", "--format", "json"],
   },
   {
+    name: "design-detect",
+    command: "npm",
+    args: ["run", "detect:design"],
+  },
+  {
     name: "typecheck",
     command: "npm",
     args: ["run", "typecheck"],

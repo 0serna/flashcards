@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-01T00:00:00.000Z",
+  "title": "Design System: Flashcards",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Clear Page",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.50 0 0)",
+          "oklch(0.65 0 0)",
+          "oklch(0.78 0 0)",
+          "oklch(0.90 0 0)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Readable Ink",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.145 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.50 0 0)",
+          "oklch(0.65 0 0)",
+          "oklch(0.78 0 0)",
+          "oklch(0.90 0 0)",
+          "oklch(0.985 0 0)"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Desk Ink",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.205 0 0)",
+          "oklch(0.30 0 0)",
+          "oklch(0.42 0 0)",
+          "oklch(0.56 0 0)",
+          "oklch(0.70 0 0)",
+          "oklch(0.84 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "destructive": {
+        "role": "tertiary",
+        "displayName": "Study Error Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.20 0.12 27.325)",
+          "oklch(0.30 0.16 27.325)",
+          "oklch(0.42 0.20 27.325)",
+          "oklch(0.577 0.245 27.325)",
+          "oklch(0.68 0.20 27.325)",
+          "oklch(0.78 0.14 27.325)",
+          "oklch(0.88 0.08 27.325)",
+          "oklch(0.95 0.03 27.325)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Simple page-level statements and empty-home states."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Auth and focused task screen headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default explanatory copy and study guidance."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels and compact control text."
+      }
+    },
+    "shadows": [
+      {
+        "name": "control-lift",
+        "value": "Tailwind shadow / shadow-sm",
+        "purpose": "Minimal tactile hint on buttons and inputs only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "transition-colors",
+        "purpose": "Fast color feedback for hover, focus, and disabled states."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single strongest action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">Send Magic Link</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; border: 0; border-radius: 8px; background: var(--primary, oklch(0.205 0 0)); color: var(--primary-foreground, oklch(0.985 0 0)); font: 500 14px/1 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; white-space: nowrap; transition: background-color 150ms ease-out; box-shadow: 0 1px 2px rgba(0,0,0,0.08); } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary, oklch(0.205 0 0)) 90%, transparent); } .ds-btn-primary:focus-visible { outline: 1px solid var(--ring, oklch(0.708 0 0)); outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A quiet secondary action that stays below the primary decision.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; border: 0; border-radius: 8px; background: var(--secondary, oklch(0.97 0 0)); color: var(--secondary-foreground, oklch(0.205 0 0)); font: 500 14px/1 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; white-space: nowrap; transition: background-color 150ms ease-out; box-shadow: 0 1px 2px rgba(0,0,0,0.06); } .ds-btn-secondary:hover { background: color-mix(in oklch, var(--secondary, oklch(0.97 0 0)) 80%, var(--foreground, oklch(0.145 0 0))); } .ds-btn-secondary:focus-visible { outline: 1px solid var(--ring, oklch(0.708 0 0)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Compact field for email and study-entry forms.",
+      "html": "<input class=\"ds-input\" placeholder=\"you@example.com\" />",
+      "css": ".ds-input { display: flex; width: 100%; height: 36px; padding: 4px 12px; border: 1px solid var(--input, oklch(0.922 0 0)); border-radius: 8px; background: transparent; color: var(--foreground, oklch(0.145 0 0)); font: 400 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; transition: border-color 150ms ease-out, box-shadow 150ms ease-out; box-shadow: 0 1px 2px rgba(0,0,0,0.06); } .ds-input::placeholder { color: var(--muted-foreground, oklch(0.556 0 0)); } .ds-input:focus-visible { outline: 1px solid var(--ring, oklch(0.708 0 0)); outline-offset: 2px; } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
+    },
+    {
+      "name": "Field Label",
+      "kind": "custom",
+      "description": "Compact form label for clear mobile entry.",
+      "html": "<label class=\"ds-label\">Email</label>",
+      "css": ".ds-label { color: var(--foreground, oklch(0.145 0 0)); font: 500 14px/1 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Study Desk",
+    "overview": "Flashcards is a restrained product interface for short, repeatable study sessions. The surface should feel like a cleared desk: almost invisible when the user is focused, dependable when they need guidance, and never louder than the learning task. The system uses neutral OKLCH tokens, compact spacing, system typography, and familiar product controls. It must support mobile-first use without turning study into entertainment. The visual language rejects the overly gamified or childish education app: no toy-like rewards, no busy mascot UI, no dopamine-feed patterns.",
+    "keyCharacteristics": [
+      "Restrained neutral palette with one primary action voice.",
+      "Touch-friendly, calm, direct components.",
+      "Compact forms and centered study surfaces.",
+      "Familiar controls over invented affordances.",
+      "Accessibility defaults: contrast, focus visibility, semantics, and reduced-motion-safe interactions."
+    ],
+    "rules": [
+      {
+        "name": "The One Action Rule",
+        "body": "Primary color is for the current action, not decoration. If everything is emphasized, no study step is clear.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Toy Palette Rule",
+        "body": "Do not add candy colors, reward gradients, or playful confetti tones unless the product direction explicitly changes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Native Clarity Rule",
+        "body": "Use one sans family across UI. Do not introduce display fonts for labels, buttons, data, or study controls.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Study Rule",
+        "body": "Resting surfaces stay flat. If a shadow does not communicate interactivity or state, remove it.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do make the next study action visually obvious with one primary action per screen.",
+      "Do preserve the compact 36px control height unless a mobile touch target needs more space.",
+      "Do use the existing neutral OKLCH tokens before adding new hues.",
+      "Do keep forms centered, short, and readable for mobile sessions.",
+      "Do verify contrast for muted text and placeholders."
+    ],
+    "donts": [
+      "Don't make Flashcards look like an overly gamified or childish education app.",
+      "Don't add loud rewards, toy-like visuals, mascot-driven UI, confetti, or dopamine-feed patterns.",
+      "Don't use gradient text, decorative glassmorphism, side-stripe borders, or repeating stripe/grid backgrounds.",
+      "Don't invent custom form affordances where native expectations are clearer.",
+      "Don't use decorative motion that does not communicate state."
+    ]
+  }
+}
