@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,10 +29,8 @@ export function LoginForm() {
         aria-live="polite"
         className="flex w-full max-w-sm flex-col items-center gap-5 text-center"
       >
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-muted-foreground">
-            Flashcards
-          </p>
+        <div className="flex flex-col items-center gap-2">
+          <Logo className="text-sm" />
           <h1 className="text-2xl font-semibold tracking-tight">
             Check your email
           </h1>
@@ -62,8 +61,8 @@ export function LoginForm() {
 
   return (
     <form action={action} className="flex w-full max-w-sm flex-col gap-5">
-      <div className="flex flex-col gap-2 text-center">
-        <p className="text-sm font-medium text-muted-foreground">Flashcards</p>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <Logo className="text-sm" />
         <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
         <p className="text-sm text-muted-foreground">
           Enter your email and we&apos;ll send you a secure sign-in link.
