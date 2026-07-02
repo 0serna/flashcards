@@ -27,18 +27,20 @@ export function LoginForm() {
     return (
       <div
         aria-live="polite"
-        className="flex w-full max-w-sm flex-col items-center gap-5 text-center"
+        className="flex w-full max-w-md flex-col items-center gap-6 text-center"
       >
-        <div className="flex flex-col items-center gap-2">
-          <Logo className="text-sm" />
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Check your email
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            We sent a secure sign-in link to{" "}
-            <span className="font-medium text-foreground">{sentEmail}</span>.
-            Open it on this device to continue.
-          </p>
+        <div className="flex flex-col items-center gap-3">
+          <Logo className="text-xl" />
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-balance">
+              Check your email
+            </h1>
+            <p className="text-sm leading-6 text-muted-foreground text-pretty">
+              We sent a secure sign-in link to{" "}
+              <span className="font-medium text-foreground">{sentEmail}</span>.
+              Open it on this device to continue.
+            </p>
+          </div>
         </div>
 
         <form action={action} className="flex w-full flex-col gap-3">
@@ -60,13 +62,17 @@ export function LoginForm() {
   }
 
   return (
-    <form action={action} className="flex w-full max-w-sm flex-col gap-5">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <Logo className="text-sm" />
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a secure sign-in link.
-        </p>
+    <form action={action} className="flex w-full max-w-md flex-col gap-6">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <Logo className="text-xl" />
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-balance">
+            Sign in
+          </h1>
+          <p className="text-sm leading-6 text-muted-foreground text-pretty">
+            We’ll email you a sign-in link.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -80,6 +86,7 @@ export function LoginForm() {
           disabled={pending}
           placeholder="you@example.com"
           defaultValue={sentEmail}
+          className="bg-background"
           aria-invalid={emailError ? "true" : undefined}
           aria-describedby={emailErrorId}
         />
@@ -100,14 +107,19 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <Button
-        type="submit"
-        disabled={pending}
-        className="w-full"
-        onClick={() => setEditingEmail(false)}
-      >
-        {pending ? "Sending…" : "Send sign-in link"}
-      </Button>
+      <div className="flex flex-col gap-3">
+        <Button
+          type="submit"
+          disabled={pending}
+          className="w-full"
+          onClick={() => setEditingEmail(false)}
+        >
+          {pending ? "Sending…" : "Send sign-in link"}
+        </Button>
+        <p className="text-center text-xs leading-5 text-muted-foreground">
+          No password needed.
+        </p>
+      </div>
     </form>
   );
 }

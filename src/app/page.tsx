@@ -27,7 +27,7 @@ const decks = [
 
 export default function Home() {
   return (
-    <main className="min-h-dvh bg-background px-4 py-4 text-foreground">
+    <main className="min-h-dvh bg-secondary/30 px-4 py-4 text-foreground">
       <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col">
         <header className="flex items-center justify-between py-2">
           <Logo className="text-base" />
@@ -65,7 +65,7 @@ export default function Home() {
             </Button>
           </div>
 
-          <div className="mt-3 divide-y divide-border rounded-xl border border-border">
+          <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-background">
             {decks.map((deck) => (
               <Link
                 key={deck.href}

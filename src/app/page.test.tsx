@@ -5,8 +5,9 @@ import Home from "./page";
 
 describe("Home", () => {
   it("shows the signed-in user a mobile-first deck starting point", () => {
-    render(<Home />);
+    const { container } = render(<Home />);
 
+    expect(container.firstElementChild).toHaveClass("bg-secondary/30");
     expect(
       screen.getByRole("heading", { name: /what do you want to study today/i }),
     ).toBeInTheDocument();

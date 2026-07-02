@@ -25,7 +25,7 @@ export function Logo({
         className,
       )}
     >
-      <LogoMark aria-hidden="true" className="size-6 shrink-0" />
+      <LogoMark aria-hidden="true" className="size-[1.5em] shrink-0" />
       {showWordmark ? <span>{label ?? "Flashcards"}</span> : null}
     </Link>
   );

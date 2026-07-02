@@ -28,8 +28,15 @@ describe("LoginForm", () => {
   it("renders the email field, label, and submit button with the expected form contract", () => {
     render(<LoginForm />);
 
+    const logo = screen.getByRole("link", { name: "Flashcards" });
+    expect(logo).toHaveClass("text-xl");
+
     const heading = screen.getByRole("heading", { name: /sign in/i });
     expect(heading).toBeInTheDocument();
+    expect(
+      screen.getByText(/we’ll email you a sign-in link/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/calm way back/i)).not.toBeInTheDocument();
 
     const emailInput = screen.getByLabelText(/email/i);
     expect(emailInput).toBeInTheDocument();
@@ -37,6 +44,8 @@ describe("LoginForm", () => {
     expect(emailInput).toHaveAttribute("type", "email");
     expect(emailInput).toBeRequired();
     expect(emailInput).toHaveClass("min-h-11");
+    expect(emailInput).toHaveClass("bg-background");
+    expect(emailInput.closest(".rounded-xl")).toBeNull();
 
     const submitButton = screen.getByRole("button", {
       name: /send sign-in link/i,
