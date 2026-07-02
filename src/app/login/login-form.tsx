@@ -10,7 +10,11 @@ import { requestMagicLink, type LoginActionState } from "@/app/login/actions";
 
 const initialState: LoginActionState = { status: "idle" };
 
-export function LoginForm() {
+type LoginFormProps = {
+  authErrorMessage?: string;
+};
+
+export function LoginForm({ authErrorMessage }: LoginFormProps = {}) {
   const [state, action, pending] = useActionState(
     requestMagicLink,
     initialState,
@@ -100,6 +104,12 @@ export function LoginForm() {
           </p>
         ) : null}
       </div>
+
+      {authErrorMessage ? (
+        <p role="alert" className="text-sm text-destructive">
+          {authErrorMessage}
+        </p>
+      ) : null}
 
       {state.status === "error" && !emailError ? (
         <p role="alert" className="text-sm text-destructive">

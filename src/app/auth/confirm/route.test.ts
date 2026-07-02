@@ -51,7 +51,7 @@ describe("GET /auth/confirm", () => {
     expect(response.headers.get("location")).toBe("http://localhost:3000/");
   });
 
-  it("redirects to login when confirmation fails", async () => {
+  it("redirects to login with an explanation when confirmation fails", async () => {
     const exchangeCodeForSession = vi.fn().mockResolvedValue({
       error: new Error("invalid code"),
     });
@@ -64,7 +64,7 @@ describe("GET /auth/confirm", () => {
     );
 
     expect(response.headers.get("location")).toBe(
-      "http://localhost:3000/login",
+      "http://localhost:3000/login?error=magic_link_failed",
     );
   });
 });
