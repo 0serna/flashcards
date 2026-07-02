@@ -24,8 +24,8 @@
 
 ## Base de datos
 
-- [ ] Supabase Postgres
-- [ ] Drizzle ORM
+- [x] Supabase Postgres
+- [x] Drizzle ORM
 
 ## Autenticación
 
@@ -45,4 +45,4 @@
 ## Deploy
 
 - [ ] Vercel Hobby
-- [ ] Supabase Free
+- [x] Supabase Free

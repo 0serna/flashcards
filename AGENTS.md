@@ -22,10 +22,6 @@
 - `npm run format`: format repository files with Prettier.
 - `npm run test`: run the Vitest test suite.
 
-## Workflow
-
-- Always use the `TDD` skill when implementing new features or fixing bugs/issues.
-
 ## Design Context
 
 - Product strategy lives in `PRODUCT.md`; default register is `product`.
