@@ -39,22 +39,25 @@ describe("LoginForm", () => {
     expect(emailInput).toHaveClass("min-h-11");
 
     const submitButton = screen.getByRole("button", {
-      name: /send magic link/i,
+      name: /send sign-in link/i,
     });
     expect(submitButton).toBeInTheDocument();
     expect(submitButton).toHaveAttribute("type", "submit");
     expect(submitButton).toHaveClass("min-h-11");
   });
 
-  it("submits the email value to the server action and shows the success message", async () => {
-    requestMagicLinkMock.mockResolvedValue({ status: "success" });
+  it("submits the email value and shows recovery actions after sending", async () => {
+    requestMagicLinkMock.mockResolvedValue({
+      status: "success",
+      email: "user@example.com",
+    });
 
     render(<LoginForm />);
 
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "user@example.com" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /send magic link/i }));
+    fireEvent.click(screen.getByRole("button", { name: /send sign-in link/i }));
 
     expect(requestMagicLinkMock).toHaveBeenCalled();
 
@@ -63,12 +66,45 @@ describe("LoginForm", () => {
         screen.getByRole("heading", { name: /check your email/i }),
       ).toBeInTheDocument();
     });
+
+    expect(screen.getByText(/user@example\.com/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /resend sign-in link/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /use a different email/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("lets the user return to the email form after a link is sent", async () => {
+    requestMagicLinkMock.mockResolvedValue({
+      status: "success",
+      email: "user@example.com",
+    });
+
+    render(<LoginForm />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /send sign-in link/i }));
+
+    await screen.findByRole("heading", { name: /check your email/i });
+    fireEvent.click(
+      screen.getByRole("button", { name: /use a different email/i }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: /sign in/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toHaveValue("user@example.com");
   });
 
   it("associates the email field error with the input", async () => {
     requestMagicLinkMock.mockResolvedValue({
       status: "error",
-      message: "We could not send the Magic Link right now. Please try again.",
+      message:
+        "We could not send the sign-in link right now. Please try again.",
       fieldErrors: { email: ["Please enter a valid email address."] },
     });
 
@@ -77,7 +113,7 @@ describe("LoginForm", () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "user@example.com" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /send magic link/i }));
+    fireEvent.click(screen.getByRole("button", { name: /send sign-in link/i }));
 
     const emailInput = screen.getByLabelText(/email/i);
     const emailError = await screen.findByRole("alert");
@@ -92,7 +128,8 @@ describe("LoginForm", () => {
   it("shows the fallback error message when the action returns a general error", async () => {
     requestMagicLinkMock.mockResolvedValue({
       status: "error",
-      message: "We could not send the Magic Link right now. Please try again.",
+      message:
+        "We could not send the sign-in link right now. Please try again.",
     });
 
     render(<LoginForm />);
@@ -100,11 +137,11 @@ describe("LoginForm", () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "user@example.com" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /send magic link/i }));
+    fireEvent.click(screen.getByRole("button", { name: /send sign-in link/i }));
 
     await waitFor(() => {
       expect(
-        screen.getByText(/we could not send the magic link right now/i),
+        screen.getByText(/we could not send the sign-in link right now/i),
       ).toBeInTheDocument();
     });
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,31 +14,59 @@ export function LoginForm() {
     requestMagicLink,
     initialState,
   );
-
-  if (state.status === "success") {
-    return (
-      <div className="flex flex-col items-center gap-3 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Check your email
-        </h1>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          We sent you a Magic Link. Open it on this device to sign in to
-          Flashcards.
-        </p>
-      </div>
-    );
-  }
+  const [editingEmail, setEditingEmail] = useState(false);
 
   const emailError =
     state.status === "error" ? state.fieldErrors?.email?.[0] : undefined;
   const emailErrorId = emailError ? "email-error" : undefined;
+  const sentEmail = state.status === "success" ? state.email : undefined;
+  const showSuccess = state.status === "success" && !editingEmail;
+
+  if (showSuccess && sentEmail) {
+    return (
+      <div
+        aria-live="polite"
+        className="flex w-full max-w-sm flex-col items-center gap-5 text-center"
+      >
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            Flashcards
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Check your email
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            We sent a secure sign-in link to{" "}
+            <span className="font-medium text-foreground">{sentEmail}</span>.
+            Open it on this device to continue.
+          </p>
+        </div>
+
+        <form action={action} className="flex w-full flex-col gap-3">
+          <input type="hidden" name="email" value={sentEmail} />
+          <Button type="submit" disabled={pending} className="w-full">
+            {pending ? "Sending…" : "Resend sign-in link"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            onClick={() => setEditingEmail(true)}
+          >
+            Use a different email
+          </Button>
+        </form>
+      </div>
+    );
+  }
 
   return (
-    <form action={action} className="flex w-full max-w-sm flex-col gap-4">
+    <form action={action} className="flex w-full max-w-sm flex-col gap-5">
       <div className="flex flex-col gap-2 text-center">
+        <p className="text-sm font-medium text-muted-foreground">Flashcards</p>
         <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email and we&apos;ll send you a Magic Link to sign in.
+          Enter your email and we&apos;ll send you a secure sign-in link.
         </p>
       </div>
 
@@ -52,6 +80,7 @@ export function LoginForm() {
           required
           disabled={pending}
           placeholder="you@example.com"
+          defaultValue={sentEmail}
           aria-invalid={emailError ? "true" : undefined}
           aria-describedby={emailErrorId}
         />
@@ -72,8 +101,13 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Sending…" : "Send Magic Link"}
+      <Button
+        type="submit"
+        disabled={pending}
+        className="w-full"
+        onClick={() => setEditingEmail(false)}
+      >
+        {pending ? "Sending…" : "Send sign-in link"}
       </Button>
     </form>
   );

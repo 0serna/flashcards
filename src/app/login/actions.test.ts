@@ -44,7 +44,7 @@ describe("requestMagicLink", () => {
       emailFormData("User@Example.com"),
     );
 
-    expect(result).toEqual({ status: "success" });
+    expect(result).toEqual({ status: "success", email: "user@example.com" });
     expect(signInWithOtp).toHaveBeenCalledWith({
       email: "user@example.com",
       options: {
@@ -79,7 +79,8 @@ describe("requestMagicLink", () => {
 
     expect(result).toEqual({
       status: "error",
-      message: "We could not send the Magic Link right now. Please try again.",
+      message:
+        "We could not send the sign-in link right now. Please try again.",
     });
   });
 });

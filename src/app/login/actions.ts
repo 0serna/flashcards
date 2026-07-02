@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type LoginActionState =
   | { status: "idle" }
-  | { status: "success" }
+  | { status: "success"; email: string }
   | { status: "error"; message: string; fieldErrors?: { email?: string[] } };
 
 async function resolveOrigin(): Promise<string> {
@@ -46,9 +46,10 @@ export async function requestMagicLink(
   if (error) {
     return {
       status: "error",
-      message: "We could not send the Magic Link right now. Please try again.",
+      message:
+        "We could not send the sign-in link right now. Please try again.",
     };
   }
 
-  return { status: "success" };
+  return { status: "success", email: parsed.data.email };
 }
