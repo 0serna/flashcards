@@ -83,4 +83,24 @@ describe("requestMagicLink", () => {
         "We could not send the sign-in link right now. Please try again.",
     });
   });
+
+  it("explains when Supabase has rate-limited email delivery", async () => {
+    const signInWithOtp = vi.fn().mockResolvedValue({
+      error: { code: "over_email_send_rate_limit" },
+    });
+    createClientMock.mockResolvedValue({
+      auth: { signInWithOtp },
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    const result = await requestMagicLink(
+      { status: "idle" },
+      emailFormData("user@example.com"),
+    );
+
+    expect(result).toEqual({
+      status: "error",
+      message:
+        "Too many sign-in links were requested. Please wait a few minutes before trying again.",
+    });
+  });
 });

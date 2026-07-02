@@ -44,6 +44,14 @@ export async function requestMagicLink(
   });
 
   if (error) {
+    if ("code" in error && error.code === "over_email_send_rate_limit") {
+      return {
+        status: "error",
+        message:
+          "Too many sign-in links were requested. Please wait a few minutes before trying again.",
+      };
+    }
+
     return {
       status: "error",
       message:
