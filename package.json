@@ -7,6 +7,7 @@
     "dev:local": "npm run supabase:start && npm run dev",
     "build": "next build",
     "start": "next start",
+    "deploy": "gh workflow run deploy.yml --ref main",
     "lint": "eslint",
     "check": "node scripts/check.mjs",
     "db:generate": "drizzle-kit generate",
