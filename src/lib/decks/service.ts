@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import type { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { decks } from "@/lib/db/schema";
 
@@ -35,6 +35,23 @@ export async function listActiveDecks(db: DrizzleDb, userId: string) {
     .from(decks)
     .where(and(eq(decks.userId, userId), isNull(decks.archivedAt)));
   return rows.map(toDeck);
+}
+
+export async function listArchivedDecks(db: DrizzleDb, userId: string) {
+  const rows = await db
+    .select()
+    .from(decks)
+    .where(and(eq(decks.userId, userId), isNotNull(decks.archivedAt)));
+  return rows.map(toDeck);
+}
+
+export async function hasArchivedDecks(db: DrizzleDb, userId: string) {
+  const rows = await db
+    .select({ id: decks.id })
+    .from(decks)
+    .where(and(eq(decks.userId, userId), isNotNull(decks.archivedAt)))
+    .limit(1);
+  return rows.length > 0;
 }
 
 export async function getActiveDeck(db: DrizzleDb, userId: string, id: string) {
@@ -92,6 +109,21 @@ export async function archiveDeck(db: DrizzleDb, userId: string, id: string) {
     .set({ archivedAt: new Date(), updatedAt: new Date() })
     .where(
       and(eq(decks.userId, userId), eq(decks.id, id), isNull(decks.archivedAt)),
+    )
+    .returning({ id: decks.id });
+  return rows.length > 0;
+}
+
+export async function restoreDeck(db: DrizzleDb, userId: string, id: string) {
+  const rows = await db
+    .update(decks)
+    .set({ archivedAt: null, updatedAt: new Date() })
+    .where(
+      and(
+        eq(decks.userId, userId),
+        eq(decks.id, id),
+        isNotNull(decks.archivedAt),
+      ),
     )
     .returning({ id: decks.id });
   return rows.length > 0;

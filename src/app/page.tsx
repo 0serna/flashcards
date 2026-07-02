@@ -1,31 +1,27 @@
 import { ChevronRight, Plus, Settings2 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { getMockCardSummary } from "@/lib/cards/mock-summary";
+import { getDb } from "@/lib/db/client";
+import {
+  getAuthenticatedUser,
+  hasArchivedDecks,
+  listActiveDecks,
+} from "@/lib/decks/service";
+import { createClient } from "@/lib/supabase/server";
 
-const decks = [
-  {
-    name: "Spanish Basics",
-    href: "/decks/spanish-basics",
-    due: "12 cards due",
-    total: "48 cards",
-  },
-  {
-    name: "Biology Terms",
-    href: "/decks/biology-terms",
-    due: "Ready tomorrow",
-    total: "31 cards",
-  },
-  {
-    name: "Product Notes",
-    href: "/decks/product-notes",
-    due: "4 cards due",
-    total: "19 cards",
-  },
-];
+export default async function Home() {
+  const supabase = await createClient();
+  const user = await getAuthenticatedUser(supabase);
+  if (!user) redirect("/login");
 
-export default function Home() {
+  const db = getDb();
+  const decks = await listActiveDecks(db, user.id);
+  const hasArchived = await hasArchivedDecks(db, user.id);
+
   return (
     <main className="min-h-dvh bg-secondary/30 px-4 py-4 text-foreground">
       <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col">
@@ -65,26 +61,46 @@ export default function Home() {
             </Button>
           </div>
 
-          <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-background">
-            {decks.map((deck) => (
-              <Link
-                key={deck.href}
-                href={deck.href}
-                className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <span>
-                  <span className="block font-medium">{deck.name}</span>
-                  <span className="mt-1 block text-sm text-muted-foreground">
-                    {deck.due} · {deck.total}
-                  </span>
-                </span>
-                <ChevronRight
-                  className="size-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-              </Link>
-            ))}
-          </div>
+          {decks.length > 0 ? (
+            <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-background">
+              {decks.map((deck) => {
+                const summary = getMockCardSummary(deck.id);
+                return (
+                  <Link
+                    key={deck.id}
+                    href={`/decks/${deck.id}`}
+                    className="flex min-w-0 items-center justify-between gap-4 p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <span className="min-w-0">
+                      <span className="block break-words font-medium">
+                        {deck.name}
+                      </span>
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        {summary.dueLabel} · {summary.totalLabel}
+                      </span>
+                    </span>
+                    <ChevronRight
+                      className="size-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-3 rounded-xl border border-border bg-background p-4">
+              <p className="font-medium">Create your first deck</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Start with one topic. You can add cards after the deck exists.
+              </p>
+            </div>
+          )}
+
+          {hasArchived ? (
+            <Button asChild variant="ghost" className="mt-4 w-full">
+              <Link href="/decks/archived">Archived decks</Link>
+            </Button>
+          ) : null}
         </section>
       </div>
     </main>

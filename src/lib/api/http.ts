@@ -17,3 +17,11 @@ export async function parseJsonBody(
     return httpErrors.badRequest("Invalid JSON body");
   }
 }
+
+export async function parseRouteParamId(
+  context: { params: Promise<{ id: string }> },
+  schema: { safeParse: (value: string) => { success: boolean } },
+): Promise<string | Response> {
+  const { id } = await context.params;
+  return schema.safeParse(id).success ? id : httpErrors.notFound();
+}

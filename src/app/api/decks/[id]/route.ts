@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db/client";
-import { httpErrors, parseJsonBody } from "@/lib/api/http";
+import { httpErrors, parseJsonBody, parseRouteParamId } from "@/lib/api/http";
 import { deckIdSchema, deckUpdateSchema } from "@/lib/decks/schema";
 import {
   archiveDeck,
@@ -9,16 +9,11 @@ import {
   updateDeck,
 } from "@/lib/decks/service";
 
-async function parseDeckId(context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
-  return deckIdSchema.safeParse(id).success ? id : httpErrors.notFound();
-}
-
 export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const id = await parseDeckId(context);
+  const id = await parseRouteParamId(context, deckIdSchema);
   if (id instanceof Response) return id;
   const supabase = await createClient();
   const user = await getAuthenticatedUser(supabase);
@@ -33,7 +28,7 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const id = await parseDeckId(context);
+  const id = await parseRouteParamId(context, deckIdSchema);
   if (id instanceof Response) return id;
   const supabase = await createClient();
   const user = await getAuthenticatedUser(supabase);
@@ -58,7 +53,7 @@ export async function DELETE(
   _request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const id = await parseDeckId(context);
+  const id = await parseRouteParamId(context, deckIdSchema);
   if (id instanceof Response) return id;
   const supabase = await createClient();
   const user = await getAuthenticatedUser(supabase);
