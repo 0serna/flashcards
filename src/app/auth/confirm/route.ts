@@ -14,10 +14,10 @@ export async function GET(request: NextRequest) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
 
-  const supabase = await createClient();
-  let error: { message: string } | null = null;
-
   try {
+    const supabase = await createClient();
+    let error: { message: string } | null = null;
+
     if (code) {
       ({ error } = await supabase.auth.exchangeCodeForSession(code));
     } else if (tokenHash && type) {

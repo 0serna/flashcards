@@ -84,4 +84,16 @@ describe("GET /auth/confirm", () => {
       "http://localhost:3000/login?error=magic_link_failed",
     );
   });
+
+  it("redirects to login with an explanation when the auth client cannot be created", async () => {
+    createClientMock.mockRejectedValue(new Error("missing Supabase config"));
+
+    const response = await GET(
+      request("http://localhost:3000/auth/confirm?code=abc123"),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/login?error=magic_link_failed",
+    );
+  });
 });
