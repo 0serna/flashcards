@@ -2,25 +2,46 @@
 
 ```text
 .
+├── drizzle/             # Drizzle migrations and metadata
+│   └── meta/
 ├── openspec/            # OpenSpec changes and specifications
 │   ├── changes/
 │   └── specs/
 ├── public/              # static assets
 ├── scripts/             # local automation
-└── src/
-    └── app/             # Next.js app router source
+├── src/                 # application source
+│   ├── app/             # Next.js app router source
+│   ├── brand/
+│   ├── components/
+│   ├── lib/
+│   └── types/
+└── supabase/            # local Supabase configuration
+    └── snippets/
 ```
 
 ## Repository Commands
 
 - `npm run dev`: start the Next.js development server.
+- `npm run dev:local`: start Supabase locally, then start the development server.
 - `npm run build`: build the production app.
 - `npm run start`: start the production server.
 - `npm run lint`: run ESLint.
 - `npm run check`: run the local quality checks.
+- `npm run db:generate`: generate Drizzle migrations.
+- `npm run db:migrate`: run Drizzle migrations.
+- `npm run db:migrate:local`: run Drizzle migrations against the local Supabase database.
+- `npm run db:check`: validate Drizzle schema consistency.
+- `npm run supabase:start`: start local Supabase services.
+- `npm run supabase:stop`: stop local Supabase services.
+- `npm run supabase:status`: show local Supabase status.
+- `npm run design`: run Impeccable design checks on `src/`.
 - `npm run typecheck`: run TypeScript without emitting files.
 - `npm run format`: format repository files with Prettier.
 - `npm run test`: run the Vitest test suite.
+
+## Configuration and Debugging
+
+- Use the repo-local CLIs through `npx supabase ...` and `npx vercel ...`.
 
 ## Design Context
 
