@@ -17,18 +17,22 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   let error: { message: string } | null = null;
 
-  if (code) {
-    ({ error } = await supabase.auth.exchangeCodeForSession(code));
-  } else if (tokenHash && type) {
-    ({ error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash: tokenHash,
-    }));
-  } else {
-    return loginWithMagicLinkError(request);
-  }
+  try {
+    if (code) {
+      ({ error } = await supabase.auth.exchangeCodeForSession(code));
+    } else if (tokenHash && type) {
+      ({ error } = await supabase.auth.verifyOtp({
+        type,
+        token_hash: tokenHash,
+      }));
+    } else {
+      return loginWithMagicLinkError(request);
+    }
 
-  if (error) {
+    if (error) {
+      return loginWithMagicLinkError(request);
+    }
+  } catch {
     return loginWithMagicLinkError(request);
   }
 

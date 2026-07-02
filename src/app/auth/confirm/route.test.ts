@@ -67,4 +67,21 @@ describe("GET /auth/confirm", () => {
       "http://localhost:3000/login?error=magic_link_failed",
     );
   });
+
+  it("redirects to login with an explanation when confirmation throws", async () => {
+    const exchangeCodeForSession = vi
+      .fn()
+      .mockRejectedValue(new Error("missing code verifier"));
+    createClientMock.mockResolvedValue({
+      auth: { exchangeCodeForSession },
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    const response = await GET(
+      request("http://localhost:3000/auth/confirm?code=abc123"),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/login?error=magic_link_failed",
+    );
+  });
 });
