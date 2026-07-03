@@ -7,6 +7,10 @@ import { useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  FlashcardImageOptimizationError,
+  optimizeFlashcardImageFile,
+} from "@/lib/cards/image-optimization";
 
 type Side = "front" | "back";
 
@@ -21,10 +25,12 @@ export type FlashcardFormInitial = {
   back: { text: string; imageUrl: string | null };
 };
 
+type FormAction = (formData: FormData) => void | Promise<void>;
+
 type FlashcardFormProps = {
   mode: "create" | "edit";
-  action: (formData: FormData) => void | Promise<void>;
-  alternativeAction?: (formData: FormData) => void | Promise<void>;
+  action: FormAction;
+  alternativeAction?: FormAction;
   alternativeLabel?: string;
   cancelHref: string;
   initial?: FlashcardFormInitial;
@@ -61,9 +67,25 @@ export function FlashcardForm({
 
   const edit = mode === "edit";
 
+  async function submitWithOptimizedImages(
+    selectedAction: FormAction,
+    formData: FormData,
+  ) {
+    try {
+      await selectedAction(await optimizeFormDataImages(formData));
+    } catch (error) {
+      if (error instanceof FormImageError) {
+        setErrors({ [error.side]: error.message });
+        setPendingAction(null);
+        return;
+      }
+      throw error;
+    }
+  }
+
   return (
     <form
-      action={action}
+      action={(formData) => submitWithOptimizedImages(action, formData)}
       onSubmit={(event) => {
         const nextErrors: { front?: string; back?: string } = {};
         if (!sideHasContent(front))
@@ -113,7 +135,9 @@ export function FlashcardForm({
         {alternativeAction ? (
           <Button
             type="submit"
-            formAction={alternativeAction}
+            formAction={(formData) =>
+              submitWithOptimizedImages(alternativeAction, formData)
+            }
             variant="secondary"
             className="w-full"
             onClick={() => setPendingAction("add-another")}
@@ -220,6 +244,44 @@ function SideEditor({
       </div>
     </div>
   );
+}
+
+async function optimizeFormDataImages(formData: FormData): Promise<FormData> {
+  const next = new FormData();
+  for (const [name, value] of formData.entries()) {
+    if (
+      (name === "frontImage" || name === "backImage") &&
+      value instanceof File &&
+      value.size > 0
+    ) {
+      try {
+        next.append(name, await optimizeFlashcardImageFile(value));
+      } catch (error) {
+        if (error instanceof FlashcardImageOptimizationError) {
+          const side = name === "frontImage" ? "front" : "back";
+          const label = side === "front" ? "Front" : "Back";
+          throw new FormImageError(
+            side,
+            `${label} ${error.message.toLowerCase()}.`,
+          );
+        }
+        throw error;
+      }
+    } else {
+      next.append(name, value);
+    }
+  }
+  return next;
+}
+
+class FormImageError extends Error {
+  constructor(
+    readonly side: Side,
+    message: string,
+  ) {
+    super(message);
+    this.name = "FormImageError";
+  }
 }
 
 function sideHasContent(side: SideState) {
