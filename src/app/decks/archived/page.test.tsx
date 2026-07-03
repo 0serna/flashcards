@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getDb: vi.fn(),
   getAuthenticatedUser: vi.fn(),
   listArchivedDecks: vi.fn(),
+  countActiveCards: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -25,6 +26,10 @@ vi.mock("@/lib/decks/service", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/cards/service", () => ({
+  countActiveCards: mocks.countActiveCards,
+}));
+
 import ArchivedDecksPage from "./page";
 
 afterEach(() => {
@@ -36,6 +41,7 @@ beforeEach(() => {
   mocks.getDb.mockReturnValue({});
   mocks.createClient.mockResolvedValue({});
   mocks.getAuthenticatedUser.mockResolvedValue({ id: "user-1" });
+  mocks.countActiveCards.mockResolvedValue(2);
   mocks.listArchivedDecks.mockResolvedValue([
     {
       id: "123e4567-e89b-12d3-a456-426614174000",
@@ -56,6 +62,7 @@ describe("ArchivedDecksPage", () => {
       screen.getByRole("heading", { name: /archived decks/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("Biology Terms")).toBeInTheDocument();
+    expect(screen.getByText(/2 cards/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /restore biology terms/i }),
     ).toBeInTheDocument();

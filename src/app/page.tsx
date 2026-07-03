@@ -7,13 +7,13 @@ import { AccountMenu } from "@/components/account-menu";
 import { AppScreen } from "@/components/app-screen";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { getMockCardSummary } from "@/lib/cards/mock-summary";
 import { getDb } from "@/lib/db/client";
 import {
   getAuthenticatedUser,
   hasArchivedDecks,
   listActiveDecks,
 } from "@/lib/decks/service";
+import { countActiveCards } from "@/lib/cards/service";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -22,8 +22,13 @@ export default async function Home() {
   if (!user) redirect("/login");
 
   const db = getDb();
-  const decks = await listActiveDecks(db, user.id);
-  const hasArchived = await hasArchivedDecks(db, user.id);
+  const [decks, hasArchived] = await Promise.all([
+    listActiveDecks(db, user.id),
+    hasArchivedDecks(db, user.id),
+  ]);
+  const counts = await Promise.all(
+    decks.map((deck) => countActiveCards(db, user.id, deck.id)),
+  );
 
   return (
     <AppScreen>
@@ -56,8 +61,8 @@ export default async function Home() {
 
         {decks.length > 0 ? (
           <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-background">
-            {decks.map((deck) => {
-              const summary = getMockCardSummary(deck.id);
+            {decks.map((deck, index) => {
+              const count = counts[index] ?? 0;
               return (
                 <Link
                   key={deck.id}
@@ -69,7 +74,7 @@ export default async function Home() {
                       {deck.name}
                     </span>
                     <span className="mt-1 block text-sm text-muted-foreground">
-                      {summary.dueLabel} · {summary.totalLabel}
+                      {count} {count === 1 ? "card" : "cards"}
                     </span>
                   </span>
                   <ChevronRight

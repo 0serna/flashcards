@@ -1,23 +1,42 @@
-import { BookOpen, Plus } from "lucide-react";
+import { ImageIcon, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { AppScreen } from "@/components/app-screen";
+import { CardActionsMenu } from "@/components/cards/card-actions-menu";
 import { DeckActionsMenu } from "@/components/decks/deck-actions-menu";
 import { Button } from "@/components/ui/button";
-import { getMockCardSummary } from "@/lib/cards/mock-summary";
+import { getDb } from "@/lib/db/client";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
+import { getAuthenticatedUser } from "@/lib/decks/service";
+import { countActiveCards, listActiveCards } from "@/lib/cards/service";
+import type { Card } from "@/lib/cards/service";
+import { createClient } from "@/lib/supabase/server";
 
+import { archiveCardAction } from "../cards/actions";
 import { archiveDeckAction } from "../actions";
 
 type DeckDetailPageProps = {
   params: Promise<{ deckId: string }>;
 };
 
+type CardSide = Card["front"];
+
 export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const { deckId } = await params;
   const deck = await loadOwnedActiveDeck(deckId);
 
-  const summary = getMockCardSummary(deck.id);
+  const supabase = await createClient();
+  const user = await getAuthenticatedUser(supabase);
+  if (!user) {
+    return null;
+  }
+
+  const [cards, count] = await Promise.all([
+    listActiveCards(getDb(), supabase, user.id, deck.id),
+    countActiveCards(getDb(), user.id, deck.id),
+  ]);
+  const safeCount = count ?? 0;
+  const safeCards = cards ?? [];
   const archiveAction = archiveDeckAction.bind(null, deck.id);
 
   return (
@@ -42,33 +61,68 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
             {deck.description}
           </p>
         ) : null}
+        <p className="mt-3 text-sm text-muted-foreground">
+          {safeCount} {safeCount === 1 ? "card" : "cards"}
+        </p>
+        <Button asChild className="mt-5 w-full">
+          <Link href={`/decks/${deck.id}/cards/new`}>
+            <Plus aria-hidden="true" />
+            Add card
+          </Link>
+        </Button>
       </header>
 
-      <section className="rounded-xl border border-border bg-background p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="font-semibold tracking-tight">Ready to study</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {summary.dueLabel} · {summary.totalLabel}
-            </p>
-          </div>
-          <BookOpen
-            className="size-5 text-muted-foreground"
-            aria-hidden="true"
-          />
-        </div>
-        <div className="mt-5 flex flex-col gap-3">
-          <Button asChild className="w-full">
-            <Link href={`/decks/${deck.id}/study`}>Study now</Link>
-          </Button>
-          <Button asChild variant="secondary" className="w-full">
-            <Link href={`/decks/${deck.id}/cards/new`}>
-              <Plus aria-hidden="true" />
-              Add card
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {safeCards.length > 0 ? (
+        <section className="space-y-3">
+          {safeCards.map((card) => {
+            const cardArchiveAction = archiveCardAction.bind(
+              null,
+              deck.id,
+              card.id,
+            );
+            return (
+              <article
+                key={card.id}
+                className="flex items-start justify-between gap-3 rounded-xl border border-border bg-background p-4"
+              >
+                <div className="min-w-0 space-y-1">
+                  <p className="flex min-w-0 items-center gap-2 break-words text-sm font-medium">
+                    {sideHasImage(card.front) ? (
+                      <ImageIcon
+                        aria-label="Front has image"
+                        className="size-3.5 shrink-0 text-muted-foreground"
+                      />
+                    ) : null}
+                    <span className="min-w-0 break-words">
+                      {card.front.text ?? "Image only"}
+                    </span>
+                  </p>
+                  <p className="flex min-w-0 items-center gap-2 break-words text-sm text-muted-foreground">
+                    {sideHasImage(card.back) ? (
+                      <ImageIcon
+                        aria-label="Back has image"
+                        className="size-3.5 shrink-0"
+                      />
+                    ) : null}
+                    <span className="min-w-0 break-words">
+                      {card.back.text ?? "Image only"}
+                    </span>
+                  </p>
+                </div>
+                <CardActionsMenu
+                  deckId={deck.id}
+                  cardId={card.id}
+                  archiveAction={cardArchiveAction}
+                />
+              </article>
+            );
+          })}
+        </section>
+      ) : null}
     </AppScreen>
   );
+}
+
+function sideHasImage(side: CardSide) {
+  return Boolean(side.imageUrl ?? side.imagePath);
 }

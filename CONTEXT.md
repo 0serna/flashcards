@@ -21,5 +21,5 @@ A study item inside a deck with a front prompt and a back answer; each side can 
 _Avoid_: card, note, question
 
 **Archived flashcard**:
-A flashcard removed from active management and study without physically deleting its content or images.
+A flashcard removed from active study and the active flashcard list without physically deleting its content or images; it can be restored from an archived view.
 _Avoid_: deleted card, trashed card, removed card

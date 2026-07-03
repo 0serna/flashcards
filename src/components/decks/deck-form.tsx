@@ -18,7 +18,6 @@ type DeckFormProps = {
 
 export function DeckForm({ mode, action, deck }: DeckFormProps) {
   const isEditing = mode === "edit";
-  const title = isEditing ? "Edit deck" : "Create deck";
   const actionLabel = isEditing ? "Save changes" : "Create deck";
 
   return (

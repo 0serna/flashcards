@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { getDb } from "@/lib/db/client";
 import {
@@ -12,7 +12,6 @@ import {
 import {
   archiveDeck,
   createDeck,
-  getActiveDeck,
   getAuthenticatedUser,
   restoreDeck,
   updateDeck,
@@ -71,18 +70,4 @@ export async function restoreDeckAction(deckId: string) {
   revalidatePath("/");
   revalidatePath("/decks/archived");
   redirect("/");
-}
-
-export async function saveMockCardAction(
-  deckId: string,
-  next: "deck" | "new-card",
-  _formData: FormData,
-) {
-  const userId = await requireUserId();
-  const id = deckIdSchema.parse(deckId);
-  const deck = await getActiveDeck(getDb(), userId, id);
-  if (!deck) notFound();
-
-  revalidatePath(`/decks/${id}`);
-  redirect(next === "new-card" ? `/decks/${id}/cards/new` : `/decks/${id}`);
 }

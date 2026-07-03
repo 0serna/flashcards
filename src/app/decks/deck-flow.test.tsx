@@ -7,6 +7,10 @@ const mocks = vi.hoisted(() => ({
   getDb: vi.fn(),
   getAuthenticatedUser: vi.fn(),
   getActiveDeck: vi.fn(),
+  listActiveCards: vi.fn(),
+  listArchivedCards: vi.fn(),
+  countActiveCards: vi.fn(),
+  getActiveCard: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -26,12 +30,23 @@ vi.mock("@/lib/decks/service", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/cards/service", () => ({
+  listActiveCards: mocks.listActiveCards,
+  listArchivedCards: mocks.listArchivedCards,
+  countActiveCards: mocks.countActiveCards,
+  getActiveCard: mocks.getActiveCard,
+}));
+
 import NewDeckPage from "./new/page";
 import AddFirstCardPage from "./[deckId]/cards/new/page";
 import DeckDetailPage from "./[deckId]/page";
 import EditDeckPage from "./[deckId]/edit/page";
+import EditCardPage from "./[deckId]/cards/[cardId]/edit/page";
+import ArchivedCardsPage from "./[deckId]/cards/archived/page";
 
 const deckId = "123e4567-e89b-12d3-a456-426614174000";
+const cardId = "550e8400-e29b-41d4-a716-446655440000";
+
 const deck = {
   id: deckId,
   name: "Spanish Basics",
@@ -40,12 +55,39 @@ const deck = {
   updatedAt: "2024-01-01T00:00:00.000Z",
 };
 
+const card = {
+  id: cardId,
+  deckId,
+  front: { text: "Hola", imagePath: null, imageUrl: null },
+  back: { text: "Hello", imagePath: null, imageUrl: null },
+  createdAt: "2024-02-01T00:00:00.000Z",
+  updatedAt: "2024-02-01T00:00:00.000Z",
+};
+
+const cardWithImages = {
+  ...card,
+  front: {
+    text: "Hola",
+    imagePath: `${deckId}/${cardId}/front/image.webp`,
+    imageUrl: "https://example.com/front.webp",
+  },
+  back: {
+    text: "Hello",
+    imagePath: `${deckId}/${cardId}/back/image.webp`,
+    imageUrl: "https://example.com/back.webp",
+  },
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.getDb.mockReturnValue({});
   mocks.createClient.mockResolvedValue({});
   mocks.getAuthenticatedUser.mockResolvedValue({ id: "user-1" });
   mocks.getActiveDeck.mockResolvedValue(deck);
+  mocks.listActiveCards.mockResolvedValue([]);
+  mocks.listArchivedCards.mockResolvedValue([]);
+  mocks.countActiveCards.mockResolvedValue(0);
+  mocks.getActiveCard.mockResolvedValue(card);
 });
 
 afterEach(() => {
@@ -72,24 +114,67 @@ describe("deck management flow", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("loads deck detail from the deck backend and keeps management in a dismissible title menu", async () => {
+  it("renders each flashcard with compact actions in a kebab menu", async () => {
+    const user = userEvent.setup();
+    mocks.listActiveCards.mockResolvedValue([card]);
+    mocks.countActiveCards.mockResolvedValue(1);
+
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    expect(mocks.listActiveCards).toHaveBeenCalled();
+    expect(mocks.countActiveCards).toHaveBeenCalled();
+    expect(screen.getByText("1 card")).toBeInTheDocument();
+    expect(screen.getByText("Hola")).toBeInTheDocument();
+    expect(screen.getByText("Hello")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /edit card/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /archive card/i }),
+    ).not.toBeInTheDocument();
+
+    const actionsButton = screen.getByRole("button", {
+      name: /more card actions/i,
+    });
+    await user.click(actionsButton);
+
+    expect(actionsButton).toHaveAttribute("aria-haspopup", "menu");
+    expect(actionsButton).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("group", { name: /card actions/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /edit card/i })).toHaveAttribute(
+      "href",
+      `/decks/${deckId}/cards/${cardId}/edit`,
+    );
+    expect(
+      screen.getByRole("button", { name: /archive card/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("marks compact front and back previews when a flashcard side has an image", async () => {
+    mocks.listActiveCards.mockResolvedValue([cardWithImages]);
+    mocks.countActiveCards.mockResolvedValue(1);
+
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    expect(screen.getByLabelText(/front has image/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/back has image/i)).toBeInTheDocument();
+  });
+
+  it("keeps secondary deck actions in the title menu and surfaces add-card as the primary action", async () => {
     const user = userEvent.setup();
     render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
 
-    expect(mocks.getActiveDeck).toHaveBeenCalledWith({}, "user-1", deckId);
-    expect(
-      screen.getByRole("heading", { name: /spanish basics/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /study now/i })).toHaveAttribute(
-      "href",
-      `/decks/${deckId}/study`,
-    );
     expect(screen.getByRole("link", { name: /add card/i })).toHaveAttribute(
       "href",
       `/decks/${deckId}/cards/new`,
     );
     expect(
       screen.queryByRole("link", { name: /edit deck/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /view archived cards/i }),
     ).not.toBeInTheDocument();
 
     const actionsButton = screen.getByRole("button", {
@@ -99,10 +184,6 @@ describe("deck management flow", () => {
 
     expect(actionsButton).toHaveAttribute("aria-haspopup", "menu");
     expect(actionsButton).toHaveAttribute("aria-expanded", "true");
-    expect(actionsButton).toHaveAttribute(
-      "aria-controls",
-      `deck-actions-${deckId}`,
-    );
     expect(
       screen.getByRole("group", { name: /deck actions/i }),
     ).toHaveAttribute("id", `deck-actions-${deckId}`);
@@ -111,17 +192,11 @@ describe("deck management flow", () => {
       `/decks/${deckId}/edit`,
     );
     expect(
+      screen.getByRole("link", { name: /view archived cards/i }),
+    ).toHaveAttribute("href", `/decks/${deckId}/cards/archived`);
+    expect(
       screen.getByRole("button", { name: /archive deck/i }),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/cards and progress are kept/i),
-    ).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("heading", { name: /spanish basics/i }));
-
-    expect(
-      screen.queryByRole("link", { name: /edit deck/i }),
-    ).not.toBeInTheDocument();
   });
 
   it("edits a deck loaded from the backend with the same form vocabulary", async () => {
@@ -139,12 +214,9 @@ describe("deck management flow", () => {
       "href",
       `/decks/${deckId}`,
     );
-    expect(
-      screen.queryByRole("button", { name: /archive deck/i }),
-    ).not.toBeInTheDocument();
   });
 
-  it("uses the real deck name when adding the first mocked card", async () => {
+  it("uses the real deck name when creating a card and offers save and save-and-add-another", async () => {
     render(await AddFirstCardPage({ params: Promise.resolve({ deckId }) }));
 
     expect(mocks.getActiveDeck).toHaveBeenCalledWith({}, "user-1", deckId);
@@ -154,18 +226,65 @@ describe("deck management flow", () => {
     expect(
       screen.getByRole("link", { name: /spanish basics/i }),
     ).toHaveAttribute("href", `/decks/${deckId}`);
-    expect(screen.getByLabelText(/front/i)).toBeRequired();
-    expect(screen.getByLabelText(/back/i)).toBeRequired();
+    expect(screen.getByLabelText("Front")).toBeInTheDocument();
+    expect(screen.getByLabelText("Back")).toBeInTheDocument();
     expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^save card$/i }),
     ).toHaveAttribute("type", "submit");
     expect(
-      screen.getByRole("button", { name: /save and create another/i }),
+      screen.getByRole("button", { name: /save and add another/i }),
     ).toHaveAttribute("type", "submit");
-    expect(screen.getByRole("link", { name: /skip for now/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /cancel/i })).toHaveAttribute(
       "href",
       `/decks/${deckId}`,
     );
+  });
+
+  it("preloads card text when editing a card", async () => {
+    render(
+      await EditCardPage({
+        params: Promise.resolve({ deckId, cardId }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: /edit card/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Hola")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Hello")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /save changes/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/active card/i)).toBeInTheDocument();
+    expect(screen.queryByText(/stays archived/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
+  });
+
+  it("lists archived cards with restore actions", async () => {
+    mocks.listArchivedCards.mockResolvedValue([card]);
+    render(
+      await ArchivedCardsPage({
+        params: Promise.resolve({ deckId }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: /archived cards/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Hola")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /restore card/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("explains when a deck has no archived cards", async () => {
+    render(
+      await ArchivedCardsPage({
+        params: Promise.resolve({ deckId }),
+      }),
+    );
+
+    expect(screen.getByText(/no archived cards/i)).toBeInTheDocument();
   });
 });

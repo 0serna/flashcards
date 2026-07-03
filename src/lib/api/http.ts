@@ -18,10 +18,30 @@ export async function parseJsonBody(
   }
 }
 
+type ParamSchema = { safeParse: (value: string) => { success: boolean } };
+
 export async function parseRouteParamId(
   context: { params: Promise<{ id: string }> },
-  schema: { safeParse: (value: string) => { success: boolean } },
+  schema: ParamSchema,
+): Promise<string | Response>;
+export async function parseRouteParamId(
+  context: { params: Promise<Record<string, string>> },
+  field: string,
+  schema: ParamSchema,
+): Promise<string | Response>;
+export async function parseRouteParamId(
+  context: { params: Promise<Record<string, string>> },
+  fieldOrSchema: string | ParamSchema,
+  schemaArg?: ParamSchema,
 ): Promise<string | Response> {
-  const { id } = await context.params;
-  return schema.safeParse(id).success ? id : httpErrors.notFound();
+  const params = await context.params;
+  if (typeof fieldOrSchema === "string") {
+    const value = params[fieldOrSchema];
+    if (!value) return httpErrors.notFound();
+    if (!schemaArg) return httpErrors.notFound();
+    return schemaArg.safeParse(value).success ? value : httpErrors.notFound();
+  }
+  const value = (params as { id?: string }).id;
+  if (!value) return httpErrors.notFound();
+  return fieldOrSchema.safeParse(value).success ? value : httpErrors.notFound();
 }

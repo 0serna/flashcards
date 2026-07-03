@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getAuthenticatedUser: vi.fn(),
   listActiveDecks: vi.fn(),
   hasArchivedDecks: vi.fn(),
+  countActiveCards: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -28,6 +29,10 @@ vi.mock("@/lib/decks/service", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/cards/service", () => ({
+  countActiveCards: mocks.countActiveCards,
+}));
+
 import Home from "./page";
 
 const deckId = "123e4567-e89b-12d3-a456-426614174000";
@@ -38,6 +43,7 @@ beforeEach(() => {
   mocks.createClient.mockResolvedValue({});
   mocks.getAuthenticatedUser.mockResolvedValue({ id: "user-1" });
   mocks.hasArchivedDecks.mockResolvedValue(false);
+  mocks.countActiveCards.mockResolvedValue(0);
   mocks.listActiveDecks.mockResolvedValue([
     {
       id: deckId,
@@ -66,7 +72,7 @@ describe("Home", () => {
     expect(
       screen.getByRole("link", { name: /spanish basics/i }),
     ).toHaveAttribute("href", `/decks/${deckId}`);
-    expect(screen.getByText(/no cards yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 cards/i)).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /study due cards/i }),
     ).not.toBeInTheDocument();

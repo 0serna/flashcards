@@ -1,0 +1,66 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { AppScreen } from "@/components/app-screen";
+import { FlashcardForm } from "@/components/cards/flashcard-form";
+import { getDb } from "@/lib/db/client";
+import { cardDeckIdSchema, cardIdSchema } from "@/lib/cards/schema";
+import { getActiveCard } from "@/lib/cards/service";
+import { getAuthenticatedUser } from "@/lib/decks/service";
+import { createClient } from "@/lib/supabase/server";
+import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
+
+import { updateCardAction } from "../../../../cards/actions";
+
+type EditCardPageProps = {
+  params: Promise<{ deckId: string; cardId: string }>;
+};
+
+export default async function EditCardPage({ params }: EditCardPageProps) {
+  const { deckId, cardId } = await params;
+  const parsedDeck = cardDeckIdSchema.safeParse(deckId);
+  const parsedCard = cardIdSchema.safeParse(cardId);
+  if (!parsedDeck.success || !parsedCard.success) notFound();
+
+  const deck = await loadOwnedActiveDeck(deckId);
+  const supabase = await createClient();
+  const user = await getAuthenticatedUser(supabase);
+  if (!user) notFound();
+
+  const card = await getActiveCard(getDb(), supabase, user.id, deckId, cardId);
+  if (!card) notFound();
+
+  const updateAction = updateCardAction.bind(null, deck.id, card.id);
+
+  return (
+    <AppScreen contentClassName="py-4">
+      <Link
+        href={`/decks/${deck.id}`}
+        className="break-words text-sm text-muted-foreground hover:text-foreground"
+      >
+        {deck.name}
+      </Link>
+
+      <header className="py-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-balance">
+          Edit card
+        </h1>
+        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
+          Update text, replace an image, or remove an image when the side keeps
+          content. Your changes save to this active card.
+        </p>
+      </header>
+
+      <FlashcardForm
+        mode="edit"
+        action={updateAction}
+        cancelHref={`/decks/${deck.id}`}
+        submitLabel="Save changes"
+        initial={{
+          front: { text: card.front.text ?? "", imageUrl: card.front.imageUrl },
+          back: { text: card.back.text ?? "", imageUrl: card.back.imageUrl },
+        }}
+      />
+    </AppScreen>
+  );
+}
