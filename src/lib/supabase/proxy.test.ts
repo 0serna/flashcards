@@ -46,10 +46,10 @@ describe("updateSession", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
-  it("allows Supabase to open confirmation without an existing session", async () => {
+  it("allows Supabase to open the OAuth callback without an existing session", async () => {
     mockClaims(null);
 
-    const response = await updateSession(request("/auth/confirm"));
+    const response = await updateSession(request("/auth/callback"));
 
     expect(response.headers.get("location")).toBeNull();
   });

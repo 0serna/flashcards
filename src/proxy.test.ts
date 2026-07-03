@@ -32,7 +32,7 @@ describe("proxy", () => {
 
     expect(matcher.test("/")).toBe(true);
     expect(matcher.test("/login")).toBe(true);
-    expect(matcher.test("/auth/confirm")).toBe(true);
+    expect(matcher.test("/auth/callback")).toBe(true);
     expect(matcher.test("/_next/static/chunks/app.js")).toBe(false);
     expect(matcher.test("/_next/image?url=%2Ficon.png&w=128&q=75")).toBe(false);
     expect(matcher.test("/favicon.ico")).toBe(false);

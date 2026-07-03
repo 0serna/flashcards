@@ -1,8 +1,4 @@
-## Purpose
-
-Define how users authenticate into the Flashcards app using Google OAuth as the sole sign-in method, replacing Magic Link passwordless email auth.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Passwordless email entry
 

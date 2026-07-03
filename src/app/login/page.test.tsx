@@ -16,15 +16,15 @@ describe("LoginPage", () => {
     expect(screen.queryByText(/quiet way back/i)).not.toBeInTheDocument();
   });
 
-  it("explains when a magic link could not be confirmed", async () => {
+  it("explains when Google sign-in could not be completed", async () => {
     render(
       await LoginPage({
-        searchParams: Promise.resolve({ error: "magic_link_failed" }),
+        searchParams: Promise.resolve({ error: "google_sign_in_failed" }),
       }),
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      /sign-in link is invalid or expired/i,
+      /google sign-in could not be completed/i,
     );
   });
 

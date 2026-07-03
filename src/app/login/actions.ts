@@ -1,13 +1,11 @@
 "use server";
 
 import { headers } from "next/headers";
-import { emailSchema } from "@/lib/auth/schema";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginActionState =
-  | { status: "idle" }
-  | { status: "success"; email: string }
-  | { status: "error"; message: string; fieldErrors?: { email?: string[] } };
+  { status: "idle" } | { status: "error"; message: string };
 
 async function resolveOrigin(): Promise<string> {
   const requestHeaders = await headers();
@@ -19,45 +17,25 @@ async function resolveOrigin(): Promise<string> {
   return "http://localhost:3000";
 }
 
-export async function requestMagicLink(
+export async function signInWithGoogle(
   _previous: LoginActionState,
-  formData: FormData,
 ): Promise<LoginActionState> {
-  const parsed = emailSchema.safeParse({ email: formData.get("email") });
-  if (!parsed.success) {
-    return {
-      status: "error",
-      message: "Please enter a valid email address.",
-      fieldErrors: parsed.error.flatten().fieldErrors,
-    };
-  }
-
   const supabase = await createClient();
-  const emailRedirectTo = `${await resolveOrigin()}/auth/confirm`;
+  const redirectTo = `${await resolveOrigin()}/auth/callback`;
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email: parsed.data.email,
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
     options: {
-      emailRedirectTo,
-      shouldCreateUser: true,
+      redirectTo,
     },
   });
 
-  if (error) {
-    if ("code" in error && error.code === "over_email_send_rate_limit") {
-      return {
-        status: "error",
-        message:
-          "Too many sign-in links were requested. Please wait a few minutes before trying again.",
-      };
-    }
-
+  if (error || !data.url) {
     return {
       status: "error",
-      message:
-        "We could not send the sign-in link right now. Please try again.",
+      message: "We could not start Google sign-in right now. Please try again.",
     };
   }
 
-  return { status: "success", email: parsed.data.email };
+  redirect(data.url);
 }

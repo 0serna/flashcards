@@ -13,7 +13,7 @@ function request(url: string) {
   return new NextRequest(url);
 }
 
-describe("GET /auth/confirm", () => {
+describe("GET /auth/callback", () => {
   beforeEach(() => {
     createClientMock.mockReset();
   });
@@ -25,33 +25,28 @@ describe("GET /auth/confirm", () => {
     } as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const response = await GET(
-      request("http://localhost:3000/auth/confirm?code=abc123"),
+      request("http://localhost:3000/auth/callback?code=abc123"),
     );
 
     expect(exchangeCodeForSession).toHaveBeenCalledWith("abc123");
     expect(response.headers.get("location")).toBe("http://localhost:3000/");
   });
 
-  it("verifies a token hash and redirects to the app", async () => {
-    const verifyOtp = vi.fn().mockResolvedValue({ error: null });
+  it("redirects to login with a Google sign-in error when the code is missing", async () => {
+    const exchangeCodeForSession = vi.fn();
     createClientMock.mockResolvedValue({
-      auth: { verifyOtp },
+      auth: { exchangeCodeForSession },
     } as unknown as Awaited<ReturnType<typeof createClient>>);
 
-    const response = await GET(
-      request(
-        "http://localhost:3000/auth/confirm?token_hash=hash123&type=email",
-      ),
-    );
+    const response = await GET(request("http://localhost:3000/auth/callback"));
 
-    expect(verifyOtp).toHaveBeenCalledWith({
-      type: "email",
-      token_hash: "hash123",
-    });
-    expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/login?error=google_sign_in_failed",
+    );
   });
 
-  it("redirects to login with an explanation when confirmation fails", async () => {
+  it("redirects to login with a Google sign-in error when the code is invalid", async () => {
     const exchangeCodeForSession = vi.fn().mockResolvedValue({
       error: new Error("invalid code"),
     });
@@ -60,15 +55,15 @@ describe("GET /auth/confirm", () => {
     } as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const response = await GET(
-      request("http://localhost:3000/auth/confirm?code=invalid"),
+      request("http://localhost:3000/auth/callback?code=invalid"),
     );
 
     expect(response.headers.get("location")).toBe(
-      "http://localhost:3000/login?error=magic_link_failed",
+      "http://localhost:3000/login?error=google_sign_in_failed",
     );
   });
 
-  it("redirects to login with an explanation when confirmation throws", async () => {
+  it("redirects to login with a Google sign-in error when exchange throws", async () => {
     const exchangeCodeForSession = vi
       .fn()
       .mockRejectedValue(new Error("missing code verifier"));
@@ -77,23 +72,23 @@ describe("GET /auth/confirm", () => {
     } as unknown as Awaited<ReturnType<typeof createClient>>);
 
     const response = await GET(
-      request("http://localhost:3000/auth/confirm?code=abc123"),
+      request("http://localhost:3000/auth/callback?code=abc123"),
     );
 
     expect(response.headers.get("location")).toBe(
-      "http://localhost:3000/login?error=magic_link_failed",
+      "http://localhost:3000/login?error=google_sign_in_failed",
     );
   });
 
-  it("redirects to login with an explanation when the auth client cannot be created", async () => {
+  it("redirects to login with a Google sign-in error when the auth client cannot be created", async () => {
     createClientMock.mockRejectedValue(new Error("missing Supabase config"));
 
     const response = await GET(
-      request("http://localhost:3000/auth/confirm?code=abc123"),
+      request("http://localhost:3000/auth/callback?code=abc123"),
     );
 
     expect(response.headers.get("location")).toBe(
-      "http://localhost:3000/login?error=magic_link_failed",
+      "http://localhost:3000/login?error=google_sign_in_failed",
     );
   });
 });
