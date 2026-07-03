@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -50,6 +51,7 @@ beforeEach(() => {
 
 describe("Home", () => {
   it("shows active decks from the backend with mocked card status", async () => {
+    const user = userEvent.setup();
     const { container } = render(await Home());
 
     expect(container.firstElementChild).toHaveClass("bg-secondary/30");
@@ -68,9 +70,13 @@ describe("Home", () => {
     expect(
       screen.queryByRole("link", { name: /study due cards/i }),
     ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /account menu/i }));
     expect(
-      screen.getByRole("link", { name: /account settings/i }),
-    ).toHaveAttribute("href", "/account");
+      screen.getByRole("group", { name: /account actions/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign out/i }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /archived decks/i }),
     ).not.toBeInTheDocument();

@@ -1,7 +1,9 @@
-import { ChevronRight, Plus, Settings2 } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { signOutAction } from "@/app/auth/actions";
+import { AccountMenu } from "@/components/account-menu";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { getMockCardSummary } from "@/lib/cards/mock-summary";
@@ -27,16 +29,7 @@ export default async function Home() {
       <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col">
         <header className="flex items-center justify-between py-2">
           <Logo className="text-base" />
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            aria-label="Account settings"
-          >
-            <Link href="/account">
-              <Settings2 aria-hidden="true" />
-            </Link>
-          </Button>
+          <AccountMenu signOutAction={signOutAction} />
         </header>
 
         <section className="pt-8">
