@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   listActiveDecks: vi.fn(),
   hasArchivedDecks: vi.fn(),
   countActiveCards: vi.fn(),
+  countDueReviewCards: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -33,6 +34,10 @@ vi.mock("@/lib/cards/service", () => ({
   countActiveCards: mocks.countActiveCards,
 }));
 
+vi.mock("@/lib/study/service", () => ({
+  countDueReviewCards: mocks.countDueReviewCards,
+}));
+
 import Home from "./page";
 
 const deckId = "123e4567-e89b-12d3-a456-426614174000";
@@ -44,6 +49,7 @@ beforeEach(() => {
   mocks.getAuthenticatedUser.mockResolvedValue({ id: "user-1" });
   mocks.hasArchivedDecks.mockResolvedValue(false);
   mocks.countActiveCards.mockResolvedValue(0);
+  mocks.countDueReviewCards.mockResolvedValue(0);
   mocks.listActiveDecks.mockResolvedValue([
     {
       id: deckId,
@@ -53,6 +59,10 @@ beforeEach(() => {
       updatedAt: "2024-01-01T00:00:00.000Z",
     },
   ]);
+});
+
+afterEach(() => {
+  cleanup();
 });
 
 describe("Home", () => {

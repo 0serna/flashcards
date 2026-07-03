@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   listActiveCards: vi.fn(),
   listArchivedCards: vi.fn(),
   countActiveCards: vi.fn(),
+  countDueReviewCards: vi.fn(),
   getActiveCard: vi.fn(),
 }));
 
@@ -35,6 +36,10 @@ vi.mock("@/lib/cards/service", () => ({
   listArchivedCards: mocks.listArchivedCards,
   countActiveCards: mocks.countActiveCards,
   getActiveCard: mocks.getActiveCard,
+}));
+
+vi.mock("@/lib/study/service", () => ({
+  countDueReviewCards: mocks.countDueReviewCards,
 }));
 
 import NewDeckPage from "./new/page";
@@ -87,6 +92,7 @@ beforeEach(() => {
   mocks.listActiveCards.mockResolvedValue([]);
   mocks.listArchivedCards.mockResolvedValue([]);
   mocks.countActiveCards.mockResolvedValue(0);
+  mocks.countDueReviewCards.mockResolvedValue(0);
   mocks.getActiveCard.mockResolvedValue(card);
 });
 
@@ -164,12 +170,16 @@ describe("deck management flow", () => {
 
   it("keeps secondary deck actions in the title menu and surfaces add-card as the primary action", async () => {
     const user = userEvent.setup();
+    mocks.countActiveCards.mockResolvedValue(1);
     render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
 
-    expect(screen.getByRole("link", { name: /add card/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /^add card$/i })).toHaveAttribute(
       "href",
       `/decks/${deckId}/cards/new`,
     );
+    expect(
+      screen.getByRole("link", { name: /practice random/i }),
+    ).toHaveAttribute("href", `/decks/${deckId}/study?mode=practice`);
     expect(
       screen.queryByRole("link", { name: /edit deck/i }),
     ).not.toBeInTheDocument();
@@ -197,6 +207,22 @@ describe("deck management flow", () => {
     expect(
       screen.getByRole("button", { name: /archive deck/i }),
     ).toBeInTheDocument();
+  });
+
+  it("surfaces study-due as the primary action when there are due flashcards", async () => {
+    mocks.countActiveCards.mockResolvedValue(5);
+    mocks.countDueReviewCards.mockResolvedValue(3);
+
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    expect(screen.getByText(/3 due now/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /study due/i })).toHaveAttribute(
+      "href",
+      `/decks/${deckId}/study?mode=review`,
+    );
+    expect(
+      screen.getByRole("link", { name: /practice random/i }),
+    ).toHaveAttribute("href", `/decks/${deckId}/study?mode=practice`);
   });
 
   it("edits a deck loaded from the backend with the same form vocabulary", async () => {

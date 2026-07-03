@@ -14,6 +14,7 @@ import {
   listActiveDecks,
 } from "@/lib/decks/service";
 import { countActiveCards } from "@/lib/cards/service";
+import { countDueReviewCards } from "@/lib/study/service";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -28,6 +29,9 @@ export default async function Home() {
   ]);
   const counts = await Promise.all(
     decks.map((deck) => countActiveCards(db, user.id, deck.id)),
+  );
+  const dueCounts = await Promise.all(
+    decks.map((deck) => countDueReviewCards(db, user.id, deck.id)),
   );
 
   return (
@@ -63,6 +67,7 @@ export default async function Home() {
           <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-background">
             {decks.map((deck, index) => {
               const count = counts[index] ?? 0;
+              const due = dueCounts[index] ?? 0;
               return (
                 <Link
                   key={deck.id}
@@ -74,7 +79,9 @@ export default async function Home() {
                       {deck.name}
                     </span>
                     <span className="mt-1 block text-sm text-muted-foreground">
-                      {count} {count === 1 ? "card" : "cards"}
+                      {due > 0
+                        ? `${due} due now · ${count} ${count === 1 ? "card" : "cards"}`
+                        : `${count} ${count === 1 ? "card" : "cards"}`}
                     </span>
                   </span>
                   <ChevronRight

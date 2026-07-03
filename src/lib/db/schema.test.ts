@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import migration from "../../../drizzle/0000_init.sql?raw";
+import migration0001 from "../../../drizzle/0001_card_scheduling_state.sql?raw";
 import { cardReviews, cards, decks } from "./schema";
 import { cardReviewRating } from "./enums";
 
@@ -30,6 +31,16 @@ describe("flashcard database schema", () => {
   it("requires both card sides to have text or an image", () => {
     expect(migration).toContain("cards_front_has_content");
     expect(migration).toContain("cards_back_has_content");
+  });
+
+  it("adds explicit spaced-repetition state to flashcards", () => {
+    const migration = migration0001;
+    expect(migration).toMatch(
+      /ALTER TABLE "cards" ADD COLUMN "review_count" integer DEFAULT 0 NOT NULL/,
+    );
+    expect(migration).toMatch(
+      /ALTER TABLE "cards" ADD COLUMN "interval_minutes" integer DEFAULT 0 NOT NULL/,
+    );
   });
 
   it("enables row-level security on all application tables", () => {

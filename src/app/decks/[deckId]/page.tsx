@@ -10,10 +10,13 @@ import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
 import { getAuthenticatedUser } from "@/lib/decks/service";
 import { countActiveCards, listActiveCards } from "@/lib/cards/service";
 import type { Card } from "@/lib/cards/service";
+import { countDueReviewCards } from "@/lib/study/service";
 import { createClient } from "@/lib/supabase/server";
 
 import { archiveCardAction } from "../cards/actions";
 import { archiveDeckAction } from "../actions";
+
+export const dynamic = "force-dynamic";
 
 type DeckDetailPageProps = {
   params: Promise<{ deckId: string }>;
@@ -31,11 +34,13 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
     return null;
   }
 
-  const [cards, count] = await Promise.all([
+  const [cards, count, due] = await Promise.all([
     listActiveCards(getDb(), supabase, user.id, deck.id),
     countActiveCards(getDb(), user.id, deck.id),
+    countDueReviewCards(getDb(), user.id, deck.id),
   ]);
   const safeCount = count ?? 0;
+  const dueNow = due ?? 0;
   const safeCards = cards ?? [];
   const archiveAction = archiveDeckAction.bind(null, deck.id);
 
@@ -62,9 +67,37 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
           </p>
         ) : null}
         <p className="mt-3 text-sm text-muted-foreground">
-          {safeCount} {safeCount === 1 ? "card" : "cards"}
+          {dueNow > 0
+            ? `${dueNow} due now · ${safeCount} ${safeCount === 1 ? "card" : "cards"}`
+            : `${safeCount} ${safeCount === 1 ? "card" : "cards"}`}
         </p>
-        <Button asChild className="mt-5 w-full">
+        <div className="mt-5 space-y-2">
+          {dueNow > 0 ? (
+            <Button asChild className="w-full">
+              <Link
+                href={`/decks/${deck.id}/study?mode=review`}
+                prefetch={false}
+              >
+                Study due
+              </Link>
+            </Button>
+          ) : null}
+          {safeCount > 0 ? (
+            <Button
+              asChild
+              variant={dueNow > 0 ? "secondary" : "default"}
+              className="w-full"
+            >
+              <Link
+                href={`/decks/${deck.id}/study?mode=practice`}
+                prefetch={false}
+              >
+                Practice random
+              </Link>
+            </Button>
+          ) : null}
+        </div>
+        <Button asChild variant="ghost" className="mt-2 w-full">
           <Link href={`/decks/${deck.id}/cards/new`}>
             <Plus aria-hidden="true" />
             Add card

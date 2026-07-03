@@ -96,7 +96,7 @@ async function getOwnedActiveDeckRow(
   return rows[0] ?? null;
 }
 
-async function signCardImages(
+export async function signCardImages(
   supabase: SupabaseClient,
   row: CardRow,
 ): Promise<{ front: string | null; back: string | null }> {

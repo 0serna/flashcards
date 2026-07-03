@@ -60,6 +60,8 @@ export const cards = pgTable(
     backImagePath: text("back_image_path"),
     dueAt: timestamp("due_at", { withTimezone: true }).notNull().defaultNow(),
     easeFactor: doublePrecision("ease_factor").notNull().default(2.5),
+    reviewCount: integer("review_count").notNull().default(0),
+    intervalMinutes: integer("interval_minutes").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

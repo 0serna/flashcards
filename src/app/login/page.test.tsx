@@ -1,7 +1,11 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import LoginPage from "./page";
+
+afterEach(() => {
+  cleanup();
+});
 
 describe("LoginPage", () => {
   it("shows one shared login surface without desktop-only marketing copy", async () => {

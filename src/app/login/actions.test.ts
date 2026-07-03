@@ -36,12 +36,10 @@ describe("signInWithGoogle", () => {
   });
 
   it("starts Google OAuth with the local auth callback", async () => {
-    const signInWithOAuth = vi
-      .fn()
-      .mockResolvedValue({
-        data: { url: "https://google.test/oauth" },
-        error: null,
-      });
+    const signInWithOAuth = vi.fn().mockResolvedValue({
+      data: { url: "https://google.test/oauth" },
+      error: null,
+    });
     createClientMock.mockResolvedValue({
       auth: { signInWithOAuth },
     } as unknown as Awaited<ReturnType<typeof createClient>>);

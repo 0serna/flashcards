@@ -23,3 +23,19 @@ _Avoid_: card, note, question
 **Archived flashcard**:
 A flashcard removed from active study and the active flashcard list without physically deleting its content or images; it can be restored from an archived view.
 _Avoid_: deleted card, trashed card, removed card
+
+**Review**:
+A study mode for flashcards whose scheduling state says they are due to be answered now.
+_Avoid_: practice, quiz, test
+
+**Practice**:
+A manual study mode for active flashcards outside the due-only review queue.
+_Avoid_: review, quiz, test
+
+**Spaced repetition**:
+A scheduling approach that decides when a flashcard should be reviewed again based on prior recall outcomes.
+_Avoid_: streak system, quiz score, game progression
+
+**Study session**:
+An ephemeral run where a user answers flashcards from one deck; each answer is saved independently as review history.
+_Avoid_: saved session, test attempt, exam
