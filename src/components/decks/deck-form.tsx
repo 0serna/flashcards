@@ -1,6 +1,7 @@
 import type React from "react";
 import Link from "next/link";
 
+import { AppScreen } from "@/components/app-screen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,24 +75,22 @@ export function DeckFormShell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-dvh bg-secondary/30 px-4 py-4 text-foreground">
-      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col py-4">
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          Home
-        </Link>
-        <header className="py-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance">
-            {title}
-          </h1>
-          <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-            {description}
-          </p>
-        </header>
-        {children}
-      </div>
-    </main>
+    <AppScreen contentClassName="py-4">
+      <Link
+        href="/"
+        className="text-sm text-muted-foreground hover:text-foreground"
+      >
+        Home
+      </Link>
+      <header className="py-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-balance">
+          {title}
+        </h1>
+        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
+          {description}
+        </p>
+      </header>
+      {children}
+    </AppScreen>
   );
 }

@@ -11,3 +11,15 @@ _Avoid_: Magic Link, email code sign-in, password login
 **Sign-out**:
 Ending the current authenticated session for the user in this browser/device without changing their Google account or study material.
 _Avoid_: account deletion, Google account logout, deck reset
+
+**Deck**:
+A user-owned collection of flashcards grouped for study.
+_Avoid_: folder, set, stack
+
+**Flashcard**:
+A study item inside a deck with a front prompt and a back answer; each side can contain text, an image, or both.
+_Avoid_: card, note, question
+
+**Archived flashcard**:
+A flashcard removed from active management and study without physically deleting its content or images.
+_Avoid_: deleted card, trashed card, removed card
