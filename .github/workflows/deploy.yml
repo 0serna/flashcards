@@ -39,8 +39,13 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Migrate production database
+      - name: Migrate production database schema
         run: npm run db:migrate
+        env:
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+
+      - name: Migrate production Supabase platform resources
+        run: npx supabase db push --db-url "$SUPABASE_DATABASE_URL"
         env:
           SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
 
