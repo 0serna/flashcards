@@ -22,21 +22,13 @@
 ## Repository Commands
 
 - `npm run dev`: start the Next.js development server.
-- `npm run dev:local`: start Supabase locally, then start the development server.
 - `npm run build`: build the production app.
-- `npm run start`: start the production server.
-- `npm run lint`: run ESLint.
 - `npm run check`: run the local quality checks.
 - `npm run db:generate`: generate Drizzle migrations.
 - `npm run db:migrate`: run Drizzle migrations.
-- `npm run db:migrate:local`: run Drizzle migrations against the local Supabase database.
-- `npm run db:check`: validate Drizzle schema consistency.
 - `npm run supabase:start`: start local Supabase services.
 - `npm run supabase:stop`: stop local Supabase services.
-- `npm run supabase:status`: show local Supabase status.
-- `npm run design`: run Impeccable design checks on `src/`.
-- `npm run typecheck`: run TypeScript without emitting files.
-- `npm run format`: format repository files with Prettier.
+- `npm run db:check`: validate Drizzle schema consistency.
 - `npm run test`: run the Vitest test suite.
 
 ## Configuration and Debugging

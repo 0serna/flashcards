@@ -3,18 +3,18 @@ import { spawnSync } from "node:child_process";
 const checks = [
   {
     name: "lint",
-    command: "npm",
-    args: ["run", "lint", "--", "--format", "json"],
+    command: "eslint",
+    args: ["--format", "json"],
   },
   {
     name: "design",
-    command: "npm",
-    args: ["run", "design"],
+    command: "impeccable",
+    args: ["detect", "src/"],
   },
   {
     name: "typecheck",
-    command: "npm",
-    args: ["run", "typecheck"],
+    command: "tsc",
+    args: ["--noEmit", "--pretty", "false"],
   },
 ];
 
