@@ -2,6 +2,8 @@
 
 ```text
 .
+├── docs/                # project documentation
+│   └── adr/
 ├── drizzle/             # Drizzle migrations and metadata
 │   └── meta/
 ├── openspec/            # OpenSpec changes and specifications
@@ -16,6 +18,7 @@
 │   ├── lib/
 │   └── types/
 └── supabase/            # local Supabase configuration
+    ├── migrations/
     └── snippets/
 ```
 
@@ -30,6 +33,7 @@
 - `npm run supabase:stop`: stop local Supabase services.
 - `npm run db:check`: validate Drizzle schema consistency.
 - `npm run test`: run the Vitest test suite.
+- `npm run deploy`: deploy to production.
 
 ## Configuration and Debugging
 

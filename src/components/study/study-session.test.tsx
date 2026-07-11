@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StudySession, type StudyCardPayload } from "./study-session";
 
@@ -18,6 +18,8 @@ const cards: StudyCardPayload[] = [
     back: { text: "Goodbye", imageUrl: null },
   },
 ];
+
+afterEach(cleanup);
 
 describe("StudySession", () => {
   it("summarizes studied flashcards by rating", async () => {
