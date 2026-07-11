@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provide a minimal Next.js App Router application shell with TypeScript, Tailwind CSS, and a landing page for the Flashcards app.
+
+## Requirements
 
 ### Requirement: Minimal Next.js application shell
 

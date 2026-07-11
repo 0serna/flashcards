@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Enable installability of the Flashcards app as a Progressive Web App with manifest and icons, without offline behavior.
+
+## Requirements
 
 ### Requirement: Web app manifest
 

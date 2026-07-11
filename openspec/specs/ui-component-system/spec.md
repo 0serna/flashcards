@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provide a foundation of reusable UI components using shadcn/ui and Lucide icons for the Flashcards app.
+
+## Requirements
 
 ### Requirement: shadcn UI foundation
 

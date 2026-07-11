@@ -4,15 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "deploy": "node scripts/deploy.mjs",
-    "check": "node scripts/check.mjs",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
-    "supabase:start": "supabase start",
-    "supabase:stop": "supabase stop",
+    "build": "next build",
     "test": "vitest run",
+    "check:format": "prettier --check .",
+    "check:lint": "eslint .",
+    "check:type": "tsc --noEmit",
+    "check:openspec": "openspec validate --all --strict",
+    "check": "npm run check:format && npm run check:lint && npm run check:type && npm run check:openspec && npm run test && npm run build && npm run db:check",
     "prepare": "husky"
   },
   "dependencies": {
@@ -56,6 +60,6 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vercel": "^54.18.7",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   }
 }
