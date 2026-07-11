@@ -13,29 +13,29 @@ Ending the current authenticated session for the user in this browser/device wit
 _Avoid_: account deletion, Google account logout, deck reset
 
 **Deck**:
-A user-owned collection of flashcards grouped for study.
+A user-owned collection of cards grouped for study.
 _Avoid_: folder, set, stack
 
-**Flashcard**:
+**Card**:
 A study item inside a deck with a front prompt and a back answer; each side can contain text, an image, or both.
-_Avoid_: card, note, question
+_Avoid_: flashcard, note, question
 
-**Archived flashcard**:
-A flashcard removed from active study and the active flashcard list without physically deleting its content or images; it can be restored from an archived view.
+**Archived card**:
+A card removed from active study and the active card list without physically deleting its content or images; it can be restored from an archived view.
 _Avoid_: deleted card, trashed card, removed card
 
 **Review**:
-A study mode for flashcards whose scheduling state says they are due to be answered now.
+A study mode for cards whose scheduling state says they are due to be answered now.
 _Avoid_: practice, quiz, test
 
 **Practice**:
-A manual study mode for active flashcards outside the due-only review queue.
+A manual study mode for active cards outside the due-only review queue.
 _Avoid_: review, quiz, test
 
 **Spaced repetition**:
-A scheduling approach that decides when a flashcard should be reviewed again based on prior recall outcomes.
+A scheduling approach that decides when a card should be reviewed again based on prior recall outcomes.
 _Avoid_: streak system, quiz score, game progression
 
 **Study session**:
-An ephemeral run where a user answers flashcards from one deck; each answer is saved independently as review history.
+An ephemeral run where a user answers cards from one deck; each answer is saved independently as review history.
 _Avoid_: saved session, test attempt, exam

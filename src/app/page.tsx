@@ -3,9 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { signOutAction } from "@/app/auth/actions";
-import { AccountMenu } from "@/components/account-menu";
 import { AppScreen } from "@/components/app-screen";
-import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/db/client";
 import {
@@ -35,12 +33,7 @@ export default async function Home() {
   );
 
   return (
-    <AppScreen>
-      <header className="flex items-center justify-between py-2">
-        <Logo className="text-base" />
-        <AccountMenu signOutAction={signOutAction} />
-      </header>
-
+    <AppScreen signOutAction={signOutAction} maxWidthClass="max-w-2xl">
       <section className="pt-8">
         <p className="text-sm text-muted-foreground">Good evening</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">

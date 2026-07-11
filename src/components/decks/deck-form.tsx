@@ -1,7 +1,15 @@
-import type React from "react";
-import Link from "next/link";
+"use client";
 
-import { AppScreen } from "@/components/app-screen";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { useState, useTransition } from "react";
+
+import { Breadcrumb } from "@/components/app/breadcrumb";
+import type { BreadcrumbItem } from "@/components/app/breadcrumb-context";
+import { GuardedLink } from "@/components/app/guarded-link";
+import { markFormClean } from "@/components/app/dirty-form-store";
+import { getPreviousAppPath } from "@/components/app/navigation-history-store";
+import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,16 +27,51 @@ type DeckFormProps = {
 export function DeckForm({ mode, action, deck }: DeckFormProps) {
   const isEditing = mode === "edit";
   const actionLabel = isEditing ? "Save changes" : "Create deck";
+  const cancelHref = isEditing && deck ? `/decks/${deck.id}` : "/";
+  const formRef = useDirtyFormTracker();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    setSubmitError(null);
+    startTransition(async () => {
+      try {
+        await action(formData);
+        if (isEditing) {
+          markFormClean();
+          setSuccess(true);
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          if (getPreviousAppPath() === cancelHref) {
+            router.back();
+          } else {
+            router.replace(cancelHref);
+          }
+        }
+        // create mode: server redirect handles navigation on success
+      } catch {
+        setSubmitError(
+          isEditing
+            ? "Could not save the deck. Try again."
+            : "Could not create the deck. Try again.",
+        );
+      }
+    });
+  }
 
   return (
     <form
-      action={action}
+      ref={formRef}
+      onSubmit={handleSubmit}
       className="space-y-5 rounded-xl border border-border bg-background p-4"
     >
       <div className="space-y-2">
-        <Label htmlFor="name">Deck name</Label>
+        <Label htmlFor="deck-name">Deck name</Label>
         <Input
-          id="name"
+          id="deck-name"
           name="name"
           required
           maxLength={120}
@@ -38,9 +81,9 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="deck-description">Description</Label>
         <textarea
-          id="description"
+          id="deck-description"
           name="description"
           rows={4}
           maxLength={2000}
@@ -50,37 +93,42 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
         />
       </div>
 
+      {submitError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {submitError}
+        </p>
+      ) : null}
+
       <div className="flex flex-col gap-3 pt-1">
-        <Button type="submit" className="w-full">
-          {actionLabel}
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Saving…" : success ? "Saved!" : actionLabel}
         </Button>
         <Button asChild variant="ghost" className="w-full">
-          <Link href={isEditing && deck ? `/decks/${deck.id}` : "/"}>
+          <GuardedLink href={cancelHref} replace>
             Cancel
-          </Link>
+          </GuardedLink>
         </Button>
       </div>
     </form>
   );
 }
 
+type DeckFormShellProps = {
+  title: string;
+  description: string;
+  breadcrumbItems: BreadcrumbItem[];
+  children: React.ReactNode;
+};
+
 export function DeckFormShell({
   title,
   description,
+  breadcrumbItems,
   children,
-}: {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
+}: DeckFormShellProps) {
   return (
-    <AppScreen contentClassName="py-4">
-      <Link
-        href="/"
-        className="text-sm text-muted-foreground hover:text-foreground"
-      >
-        Home
-      </Link>
+    <>
+      <Breadcrumb items={breadcrumbItems} />
       <header className="py-8">
         <h1 className="text-3xl font-semibold tracking-tight text-balance">
           {title}
@@ -90,6 +138,6 @@ export function DeckFormShell({
         </p>
       </header>
       {children}
-    </AppScreen>
+    </>
   );
 }

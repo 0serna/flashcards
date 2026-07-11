@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { signOutAction } from "@/app/auth/actions";
+import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/db/client";
@@ -28,13 +29,18 @@ export default async function ArchivedCardsPage({
   const cards = await listArchivedCards(getDb(), supabase, user.id, deck.id);
 
   return (
-    <AppScreen contentClassName="py-4">
-      <Link
-        href={`/decks/${deck.id}`}
-        className="break-words text-sm text-muted-foreground hover:text-foreground"
-      >
-        {deck.name}
-      </Link>
+    <AppScreen
+      contentClassName="py-4"
+      signOutAction={signOutAction}
+      maxWidthClass="max-w-2xl"
+    >
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: deck.name, href: `/decks/${deck.id}` },
+          { label: "Archived cards" },
+        ]}
+      />
 
       <header className="py-8">
         <h1 className="text-3xl font-semibold tracking-tight text-balance">

@@ -62,9 +62,9 @@ export async function createCardAction(
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/archived`);
   if (next === "new-card") {
-    redirect(`/decks/${id}/cards/new`);
+    redirect(`/decks/${id}/cards/new`, "replace");
   }
-  redirect(`/decks/${id}`);
+  redirect(`/decks/${id}`, "replace");
 }
 
 export async function updateCardAction(
@@ -111,7 +111,6 @@ export async function updateCardAction(
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/${card}`);
   revalidatePath(`/decks/${id}/cards/archived`);
-  redirect(`/decks/${id}`);
 }
 
 export async function archiveCardAction(deckId: string, cardId: string) {
@@ -124,7 +123,7 @@ export async function archiveCardAction(deckId: string, cardId: string) {
 
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/archived`);
-  redirect(`/decks/${id}`);
+  redirect(`/decks/${id}`, "replace");
 }
 
 export async function restoreCardAction(deckId: string, cardId: string) {
@@ -137,5 +136,5 @@ export async function restoreCardAction(deckId: string, cardId: string) {
 
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/archived`);
-  redirect(`/decks/${id}/cards/archived`);
+  redirect(`/decks/${id}/cards/archived`, "replace");
 }

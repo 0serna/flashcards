@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -66,6 +66,19 @@ describe("ArchivedDecksPage", () => {
     expect(
       screen.getByRole("button", { name: /restore biology terms/i }),
     ).toBeInTheDocument();
+    // Shared header and contextual navigation.
+    expect(
+      screen.getByRole("link", { name: /flashcards home/i }),
+    ).toHaveAttribute("href", "/");
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    expect(breadcrumb).toBeInTheDocument();
+    expect(
+      within(breadcrumb).getByRole("link", { name: "Home" }),
+    ).toHaveAttribute("href", "/");
+    expect(within(breadcrumb).getByText("Archived decks")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 
   it("explains when there are no archived decks", async () => {

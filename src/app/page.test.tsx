@@ -86,6 +86,14 @@ describe("Home", () => {
     expect(
       screen.queryByRole("link", { name: /study due cards/i }),
     ).not.toBeInTheDocument();
+    // Shared authenticated header: home logo and account menu.
+    expect(
+      screen.getByRole("link", { name: /flashcards home/i }),
+    ).toHaveAttribute("href", "/");
+    // Home does not render a redundant breadcrumb.
+    expect(
+      screen.queryByRole("navigation", { name: /breadcrumb/i }),
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /account menu/i }));
     expect(
       screen.getByRole("group", { name: /account actions/i }),

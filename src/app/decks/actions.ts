@@ -38,7 +38,7 @@ export async function createDeckAction(formData: FormData) {
   const deck = await createDeck(getDb(), userId, parsed);
 
   revalidatePath("/");
-  redirect(`/decks/${deck.id}/cards/new`);
+  redirect(`/decks/${deck.id}/cards/new`, "replace");
 }
 
 export async function updateDeckAction(deckId: string, formData: FormData) {
@@ -49,7 +49,6 @@ export async function updateDeckAction(deckId: string, formData: FormData) {
 
   revalidatePath("/");
   revalidatePath(`/decks/${id}`);
-  redirect(`/decks/${id}`);
 }
 
 export async function archiveDeckAction(deckId: string) {
@@ -59,7 +58,7 @@ export async function archiveDeckAction(deckId: string) {
 
   revalidatePath("/");
   revalidatePath("/decks/archived");
-  redirect("/");
+  redirect("/", "replace");
 }
 
 export async function restoreDeckAction(deckId: string) {
@@ -69,5 +68,5 @@ export async function restoreDeckAction(deckId: string) {
 
   revalidatePath("/");
   revalidatePath("/decks/archived");
-  redirect("/");
+  redirect("/", "replace");
 }

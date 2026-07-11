@@ -3,7 +3,7 @@
 import { RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -33,15 +33,6 @@ const RATING_LABELS: Record<StudyRating, string> = {
   remembered: "I knew it",
 };
 
-function shuffle<T>(items: T[]): T[] {
-  const array = items.slice();
-  for (let i = array.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 export function StudySession({
   mode,
   deckId,
@@ -49,10 +40,7 @@ export function StudySession({
   initialCards,
   submitRating,
 }: StudySessionProps) {
-  const orderedCards = useMemo(
-    () => (mode === "practice" ? shuffle(initialCards) : initialCards),
-    [mode, initialCards],
-  );
+  const orderedCards = initialCards;
 
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -86,7 +74,9 @@ export function StudySession({
           </Button>
         ) : null}
         <Button asChild variant="ghost" className="w-full">
-          <Link href={`/decks/${deckId}`}>Back to {deckName}</Link>
+          <Link replace href={`/decks/${deckId}`}>
+            Back to {deckName}
+          </Link>
         </Button>
       </div>
     );
@@ -116,7 +106,9 @@ export function StudySession({
           </dl>
         </div>
         <Button asChild className="w-full">
-          <Link href={`/decks/${deckId}`}>Back to {deckName}</Link>
+          <Link replace href={`/decks/${deckId}`}>
+            Back to {deckName}
+          </Link>
         </Button>
       </div>
     );
@@ -149,10 +141,19 @@ export function StudySession({
 
   return (
     <div className="space-y-6">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-        {mode === "review" ? "Review" : "Practice"} · {index + 1}/
-        {orderedCards.length}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          {mode === "review" ? "Review" : "Practice"} · {index + 1}/
+          {orderedCards.length}
+        </p>
+        <Link
+          href={`/decks/${deckId}`}
+          replace
+          className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
+        >
+          End session
+        </Link>
+      </div>
 
       <article className="space-y-4 rounded-2xl border border-border bg-background p-6">
         <CardFace

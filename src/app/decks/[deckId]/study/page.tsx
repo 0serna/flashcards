@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { signOutAction } from "@/app/auth/actions";
+import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { StudySession } from "@/components/study/study-session";
 import type { StudyCardPayload } from "@/components/study/study-session";
@@ -18,6 +19,18 @@ type StudyPageProps = {
   params: Promise<{ deckId: string }>;
   searchParams: Promise<{ mode?: string | string[] }>;
 };
+
+function shuffleCards<T>(cards: T[]): T[] {
+  const shuffled = cards.slice();
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [
+      shuffled[swapIndex],
+      shuffled[index],
+    ];
+  }
+  return shuffled;
+}
 
 function parseMode(
   value: string | string[] | undefined,
@@ -54,30 +67,28 @@ export default async function StudyPage({
   }));
 
   const boundSubmit = submitRatingAction.bind(null, deck.id);
+  const orderedCards =
+    resolvedMode === "practice" ? shuffleCards(cards) : cards;
+  const modeLabel = resolvedMode === "review" ? "Review" : "Practice";
 
   return (
-    <AppScreen contentClassName="py-4">
-      <header className="flex items-start justify-between gap-4 py-6">
-        <div className="min-w-0">
-          <p className="break-words text-sm text-muted-foreground">
-            {deck.name}
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-balance">
-            {resolvedMode === "review" ? "Review" : "Practice"}
-          </h1>
-        </div>
-        <Link
-          href={`/decks/${deck.id}`}
-          className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-        >
-          End session
-        </Link>
-      </header>
+    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: deck.name, href: `/decks/${deck.id}` },
+          { label: modeLabel },
+        ]}
+      />
+
+      <h1 className="text-2xl font-semibold tracking-tight text-balance pb-6 pt-4">
+        {modeLabel}
+      </h1>
       <StudySession
         mode={resolvedMode}
         deckId={deck.id}
         deckName={deck.name}
-        initialCards={cards}
+        initialCards={orderedCards}
         submitRating={boundSubmit}
       />
     </AppScreen>

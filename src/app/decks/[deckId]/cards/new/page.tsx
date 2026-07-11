@@ -1,5 +1,5 @@
-import Link from "next/link";
-
+import { signOutAction } from "@/app/auth/actions";
+import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { FlashcardForm } from "@/components/cards/flashcard-form";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
@@ -19,13 +19,14 @@ export default async function AddFirstCardPage({
   const saveAnotherAction = createCardAction.bind(null, deck.id, "new-card");
 
   return (
-    <AppScreen contentClassName="py-4">
-      <Link
-        href={`/decks/${deck.id}`}
-        className="break-words text-sm text-muted-foreground hover:text-foreground"
-      >
-        {deck.name}
-      </Link>
+    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: deck.name, href: `/decks/${deck.id}` },
+          { label: "Add card" },
+        ]}
+      />
 
       <header className="py-8">
         <h1 className="text-3xl font-semibold tracking-tight text-balance">

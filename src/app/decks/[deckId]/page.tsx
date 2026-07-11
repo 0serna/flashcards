@@ -1,6 +1,8 @@
 import { ImageIcon, Plus } from "lucide-react";
 import Link from "next/link";
 
+import { signOutAction } from "@/app/auth/actions";
+import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { CardActionsMenu } from "@/components/cards/card-actions-menu";
 import { DeckActionsMenu } from "@/components/decks/deck-actions-menu";
@@ -45,13 +47,14 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const archiveAction = archiveDeckAction.bind(null, deck.id);
 
   return (
-    <AppScreen contentClassName="py-4">
-      <Link
-        href="/"
-        className="text-sm text-muted-foreground hover:text-foreground"
-      >
-        Home
-      </Link>
+    <AppScreen
+      contentClassName="py-4"
+      signOutAction={signOutAction}
+      maxWidthClass="max-w-2xl"
+    >
+      <Breadcrumb
+        items={[{ label: "Home", href: "/" }, { label: deck.name }]}
+      />
 
       <header className="py-8">
         <p className="text-sm text-muted-foreground">Deck</p>

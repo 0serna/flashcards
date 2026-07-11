@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -186,6 +186,15 @@ describe("deck management flow", () => {
     expect(
       screen.queryByRole("link", { name: /view archived cards/i }),
     ).not.toBeInTheDocument();
+    // Shared header + deck-detail breadcrumb (Home / Spanish Basics).
+    expect(
+      screen.getByRole("link", { name: /flashcards home/i }),
+    ).toHaveAttribute("href", "/");
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    expect(within(breadcrumb).getByText("Spanish Basics")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
 
     const actionsButton = screen.getByRole("button", {
       name: /more deck actions/i,
@@ -240,6 +249,16 @@ describe("deck management flow", () => {
       "href",
       `/decks/${deckId}`,
     );
+    // Edit deck is reached via Home / [Deck] / Edit deck.
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    expect(within(breadcrumb).getByText("Edit deck")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    const deckLink = within(breadcrumb).getByRole("link", {
+      name: "Spanish Basics",
+    });
+    expect(deckLink).toHaveAttribute("href", `/decks/${deckId}`);
   });
 
   it("uses the real deck name when creating a card and offers save and save-and-add-another", async () => {
@@ -249,9 +268,6 @@ describe("deck management flow", () => {
     expect(
       screen.getByRole("heading", { name: /add the first card/i }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /spanish basics/i }),
-    ).toHaveAttribute("href", `/decks/${deckId}`);
     expect(screen.getByLabelText("Front")).toBeInTheDocument();
     expect(screen.getByLabelText("Back")).toBeInTheDocument();
     expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
@@ -265,6 +281,15 @@ describe("deck management flow", () => {
       "href",
       `/decks/${deckId}`,
     );
+    // Add card breadcrumb: Home / [Deck] / Add card.
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    expect(within(breadcrumb).getByText("Add card")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      within(breadcrumb).getByRole("link", { name: "Spanish Basics" }),
+    ).toHaveAttribute("href", `/decks/${deckId}`);
   });
 
   it("preloads card text when editing a card", async () => {
@@ -285,6 +310,12 @@ describe("deck management flow", () => {
     expect(screen.getByText(/active card/i)).toBeInTheDocument();
     expect(screen.queryByText(/stays archived/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
+    // Edit card breadcrumb: Home / [Deck] / Edit card.
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    expect(within(breadcrumb).getByText("Edit card")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 
   it("lists archived cards with restore actions", async () => {
@@ -302,6 +333,12 @@ describe("deck management flow", () => {
     expect(
       screen.getByRole("button", { name: /restore card/i }),
     ).toBeInTheDocument();
+    // Archived cards breadcrumb: Home / [Deck] / Archived cards.
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    expect(within(breadcrumb).getByText("Archived cards")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 
   it("explains when a deck has no archived cards", async () => {

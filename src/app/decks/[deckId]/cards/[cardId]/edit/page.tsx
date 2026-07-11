@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { signOutAction } from "@/app/auth/actions";
+import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { FlashcardForm } from "@/components/cards/flashcard-form";
 import { getDb } from "@/lib/db/client";
@@ -33,13 +34,14 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
   const updateAction = updateCardAction.bind(null, deck.id, card.id);
 
   return (
-    <AppScreen contentClassName="py-4">
-      <Link
-        href={`/decks/${deck.id}`}
-        className="break-words text-sm text-muted-foreground hover:text-foreground"
-      >
-        {deck.name}
-      </Link>
+    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+      <Breadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: deck.name, href: `/decks/${deck.id}` },
+          { label: "Edit card" },
+        ]}
+      />
 
       <header className="py-8">
         <h1 className="text-3xl font-semibold tracking-tight text-balance">

@@ -2,9 +2,13 @@
 
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 
+import { GuardedLink } from "@/components/app/guarded-link";
+import { markFormClean } from "@/components/app/dirty-form-store";
+import { getPreviousAppPath } from "@/components/app/navigation-history-store";
+import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -64,20 +68,25 @@ export function FlashcardForm({
     "save" | "add-another" | null
   >(null);
   const [errors, setErrors] = useState<{ front?: string; back?: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const formRef = useDirtyFormTracker();
+  const router = useRouter();
 
   const edit = mode === "edit";
 
   async function submitWithOptimizedImages(
     selectedAction: FormAction,
     formData: FormData,
-  ) {
+  ): Promise<boolean> {
     try {
       await selectedAction(await optimizeFormDataImages(formData));
+      return true;
     } catch (error) {
       if (error instanceof FormImageError) {
         setErrors({ [error.side]: error.message });
         setPendingAction(null);
-        return;
+        return false;
       }
       throw error;
     }
@@ -85,8 +94,34 @@ export function FlashcardForm({
 
   return (
     <form
-      action={(formData) => submitWithOptimizedImages(action, formData)}
+      ref={formRef}
+      action={async (formData) => {
+        setSubmitError(null);
+        try {
+          const ok = await submitWithOptimizedImages(action, formData);
+          if (edit && ok) {
+            markFormClean();
+            setSuccess(true);
+            await new Promise((resolve) => setTimeout(resolve, 800));
+            if (getPreviousAppPath() === cancelHref) {
+              router.back();
+            } else {
+              router.replace(cancelHref);
+            }
+          }
+          // create mode: server redirect handles navigation on success
+        } catch {
+          setSubmitError(
+            edit
+              ? "Could not save the card. Try again."
+              : "Could not create the card. Try again.",
+          );
+          setPendingAction(null);
+        }
+        return undefined;
+      }}
       onSubmit={(event) => {
+        setSubmitError(null);
         const nextErrors: { front?: string; back?: string } = {};
         if (!sideHasContent(front))
           nextErrors.front = "Front needs text or an image.";
@@ -118,6 +153,11 @@ export function FlashcardForm({
         imageId={backImageId}
         edit={edit}
       />
+      {submitError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {submitError}
+        </p>
+      ) : null}
       {errors.front || errors.back ? (
         <div className="space-y-1 text-sm text-destructive" role="alert">
           {errors.front ? <p>{errors.front}</p> : null}
@@ -128,18 +168,30 @@ export function FlashcardForm({
         <Button
           type="submit"
           className="w-full"
+          disabled={pendingAction !== null}
           onClick={() => setPendingAction("save")}
         >
-          {pendingAction === "save" ? "Saving…" : submitLabel}
+          {pendingAction === "save"
+            ? "Saving…"
+            : success
+              ? "Saved!"
+              : submitLabel}
         </Button>
         {alternativeAction ? (
           <Button
             type="submit"
-            formAction={(formData) =>
-              submitWithOptimizedImages(alternativeAction, formData)
-            }
+            formAction={async (formData) => {
+              setSubmitError(null);
+              try {
+                await submitWithOptimizedImages(alternativeAction, formData);
+              } catch {
+                setSubmitError("Could not create the card. Try again.");
+                setPendingAction(null);
+              }
+            }}
             variant="secondary"
             className="w-full"
+            disabled={pendingAction !== null}
             onClick={() => setPendingAction("add-another")}
           >
             {pendingAction === "add-another"
@@ -148,7 +200,9 @@ export function FlashcardForm({
           </Button>
         ) : null}
         <Button asChild variant="ghost" className="w-full">
-          <Link href={cancelHref}>Cancel</Link>
+          <GuardedLink href={cancelHref} replace>
+            Cancel
+          </GuardedLink>
         </Button>
       </div>
     </form>

@@ -1,22 +1,4 @@
-## Purpose
-
-Provide a minimal Next.js App Router application shell with TypeScript, Tailwind CSS, and a landing page for the Flashcards app.
-
-## Requirements
-
-### Requirement: Minimal Next.js application shell
-
-The system SHALL provide a runnable Next.js App Router application initialized with TypeScript, Tailwind CSS, ESLint, npm, a `src/` directory, and the default `@/*` import alias.
-
-#### Scenario: Project installs and runs
-
-- **WHEN** dependencies are installed with npm and the development server is started
-- **THEN** the application SHALL serve a Next.js App Router page without runtime errors
-
-#### Scenario: Quality checks run
-
-- **WHEN** the project lint command is executed
-- **THEN** ESLint SHALL complete successfully
+## MODIFIED Requirements
 
 ### Requirement: Initial flashcards landing page
 
@@ -31,6 +13,8 @@ The system SHALL show an authenticated Home page for the Flashcards app with the
 
 - **WHEN** an unauthenticated user visits `/`
 - **THEN** the application SHALL redirect the user to `/login` without rendering the authenticated header
+
+## ADDED Requirements
 
 ### Requirement: Shared authenticated application header
 
