@@ -100,6 +100,7 @@ export function FlashcardForm({
         try {
           const ok = await submitWithOptimizedImages(action, formData);
           if (edit && ok) {
+            setPendingAction(null);
             markFormClean();
             setSuccess(true);
             await new Promise((resolve) => setTimeout(resolve, 800));
@@ -122,6 +123,7 @@ export function FlashcardForm({
       }}
       onSubmit={(event) => {
         setSubmitError(null);
+        setPendingAction("save");
         const nextErrors: { front?: string; back?: string } = {};
         if (!sideHasContent(front))
           nextErrors.front = "Front needs text or an image.";
@@ -169,7 +171,6 @@ export function FlashcardForm({
           type="submit"
           className="w-full"
           disabled={pendingAction !== null}
-          onClick={() => setPendingAction("save")}
         >
           {pendingAction === "save"
             ? "Saving…"
@@ -182,6 +183,7 @@ export function FlashcardForm({
             type="submit"
             formAction={async (formData) => {
               setSubmitError(null);
+              setPendingAction("add-another");
               try {
                 await submitWithOptimizedImages(alternativeAction, formData);
               } catch {
@@ -192,7 +194,6 @@ export function FlashcardForm({
             variant="secondary"
             className="w-full"
             disabled={pendingAction !== null}
-            onClick={() => setPendingAction("add-another")}
           >
             {pendingAction === "add-another"
               ? "Saving and preparing another…"
