@@ -39,7 +39,7 @@ export function AccountMenu({
     <div ref={rootRef} className="relative shrink-0">
       <Button
         type="button"
-        variant="ghost"
+        variant="secondary"
         size="icon"
         aria-label="Account menu"
         aria-controls={open ? menuId : undefined}
@@ -60,7 +60,7 @@ export function AccountMenu({
           <form action={signOutAction}>
             <Button
               type="submit"
-              variant="ghost"
+              variant="secondary"
               className="w-full justify-start"
             >
               <LogOut aria-hidden="true" />

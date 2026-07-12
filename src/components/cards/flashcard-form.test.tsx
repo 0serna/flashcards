@@ -224,6 +224,31 @@ describe("FlashcardForm", () => {
     );
   });
 
+  it("archives without requiring front or back content", async () => {
+    const user = userEvent.setup();
+    const archiveAction = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <FlashcardForm
+        mode="edit"
+        action={vi.fn()}
+        archiveAction={archiveAction}
+        cancelHref="/decks/deck-1"
+        submitLabel="Save changes"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /^archive$/i }));
+
+    await waitFor(() => expect(archiveAction).toHaveBeenCalledOnce());
+    expect(
+      screen.queryByText(/front needs text or an image/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/back needs text or an image/i),
+    ).not.toBeInTheDocument();
+  });
+
   it("does not prompt on Cancel when the form is clean", async () => {
     const user = userEvent.setup();
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);

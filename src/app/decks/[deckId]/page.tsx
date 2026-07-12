@@ -185,7 +185,7 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
       </section>
 
       {hasArchived ? (
-        <Button asChild variant="ghost" className="mt-4 w-full">
+        <Button asChild variant="secondary" className="mt-4 w-full">
           <Link href={`/decks/${deck.id}/cards/archived`}>Archived cards</Link>
         </Button>
       ) : null}

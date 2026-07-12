@@ -26,9 +26,8 @@
 
 - `npm run dev`: start the Next.js development server.
 - `npm run build`: build the production app.
-- `npm run format`: check repository formatting.
+- `npm run format`: format repository files.
 - `npm run lint`: run the linter.
-- `npm run typecheck`: run the TypeScript type checker.
 - `npm run db:generate`: generate Drizzle migrations.
 - `npm run db:migrate`: run Drizzle migrations.
 - `npm run db:check`: validate Drizzle schema consistency.

@@ -48,7 +48,7 @@ export function DeckActionsMenu({
       <Button
         ref={triggerRef}
         type="button"
-        variant="ghost"
+        variant="secondary"
         size="icon"
         aria-label="More deck actions"
         aria-controls={open ? menuId : undefined}
@@ -65,7 +65,7 @@ export function DeckActionsMenu({
           aria-label="Deck actions"
           className="absolute right-0 top-12 z-10 w-52 space-y-1 rounded-xl border border-border bg-background p-1 shadow-sm"
         >
-          <Button asChild variant="ghost" className="w-full justify-start">
+          <Button asChild variant="secondary" className="w-full justify-start">
             <Link href={`/decks/${deckId}/edit`}>
               <Pencil aria-hidden="true" />
               Edit deck

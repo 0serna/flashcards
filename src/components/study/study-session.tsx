@@ -85,7 +85,7 @@ export function StudySession({
               </Link>
             </Button>
           ) : null}
-          <Button asChild variant="ghost" className="w-full">
+          <Button asChild variant="secondary" className="w-full">
             <Link replace href={`/decks/${deckId}`}>
               Back to {deckName}
             </Link>

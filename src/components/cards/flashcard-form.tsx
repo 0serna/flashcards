@@ -10,7 +10,9 @@ import { markFormClean } from "@/components/app/dirty-form-store";
 import { getPreviousAppPath } from "@/components/app/navigation-history-store";
 import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
 import { Button } from "@/components/ui/button";
+import { FormActions, FormSurface } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   FlashcardImageOptimizationError,
   optimizeFlashcardImageFile,
@@ -36,6 +38,7 @@ type FlashcardFormProps = {
   action: FormAction;
   alternativeAction?: FormAction;
   alternativeLabel?: string;
+  archiveAction?: FormAction;
   cancelHref: string;
   initial?: FlashcardFormInitial;
   submitLabel: string;
@@ -46,6 +49,7 @@ export function FlashcardForm({
   action,
   alternativeAction,
   alternativeLabel,
+  archiveAction,
   cancelHref,
   initial,
   submitLabel,
@@ -65,7 +69,7 @@ export function FlashcardForm({
     removeImage: false,
   });
   const [pendingAction, setPendingAction] = useState<
-    "save" | "add-another" | null
+    "save" | "add-another" | "archive" | null
   >(null);
   const [errors, setErrors] = useState<{ front?: string; back?: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -102,7 +106,7 @@ export function FlashcardForm({
   }
 
   return (
-    <form
+    <FormSurface
       ref={formRef}
       action={async (formData) => {
         setSubmitError(null);
@@ -131,6 +135,14 @@ export function FlashcardForm({
         return undefined;
       }}
       onSubmit={(event) => {
+        const submitter = event.nativeEvent.submitter;
+        if (
+          submitter instanceof HTMLElement &&
+          submitter.dataset.formAction === "archive"
+        ) {
+          return;
+        }
+
         setSubmitError(null);
         setPendingAction("save");
         const nextErrors: { front?: string; back?: string } = {};
@@ -144,7 +156,6 @@ export function FlashcardForm({
           setPendingAction(null);
         }
       }}
-      className="space-y-6 rounded-xl border border-border bg-background p-4"
     >
       <SideEditor
         side="front"
@@ -175,10 +186,10 @@ export function FlashcardForm({
           {errors.back ? <p>{errors.back}</p> : null}
         </div>
       ) : null}
-      <div className="flex flex-col gap-3 pt-1">
+      <FormActions>
         <Button
           type="submit"
-          className="w-full"
+          className="w-full sm:w-auto"
           disabled={pendingAction !== null}
         >
           {pendingAction === "save"
@@ -201,7 +212,7 @@ export function FlashcardForm({
               }
             }}
             variant="secondary"
-            className="w-full"
+            className="w-full sm:w-auto"
             disabled={pendingAction !== null}
           >
             {pendingAction === "add-another"
@@ -209,13 +220,28 @@ export function FlashcardForm({
               : (alternativeLabel ?? "Save and add another")}
           </Button>
         ) : null}
-        <Button asChild variant="ghost" className="w-full">
+        <Button asChild variant="secondary" className="w-full sm:w-auto">
           <GuardedLink href={cancelHref} replace>
             Cancel
           </GuardedLink>
         </Button>
-      </div>
-    </form>
+        {archiveAction ? (
+          <Button
+            type="submit"
+            formAction={async (formData) => {
+              setPendingAction("archive");
+              await archiveAction(formData);
+            }}
+            variant="destructive"
+            className="w-full sm:w-auto"
+            data-form-action="archive"
+            disabled={pendingAction !== null}
+          >
+            Archive
+          </Button>
+        ) : null}
+      </FormActions>
+    </FormSurface>
   );
 }
 
@@ -256,10 +282,10 @@ function SideEditor({
   return (
     <div className="space-y-2">
       <Label htmlFor={fieldId}>{label}</Label>
-      <textarea
+      <Textarea
         id={fieldId}
         name={`${side}Text`}
-        rows={4}
+        rows={3}
         maxLength={2000}
         value={value.text}
         onChange={(event) => onChange({ ...value, text: event.target.value })}
@@ -268,64 +294,62 @@ function SideEditor({
             ? "Question, word, or prompt"
             : "Answer or explanation"
         }
-        className="flex min-h-28 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm"
+        className="min-h-24"
       />
-      <div className="flex flex-col gap-2 rounded-md border border-dashed border-border p-3 focus-within:ring-1 focus-within:ring-ring">
-        {value.imageUrl && !value.removeImage ? (
-          <div className="relative overflow-hidden rounded-md">
-            <Image
-              src={value.imageUrl}
-              alt={`${label} preview`}
-              width={320}
-              height={240}
-              unoptimized
-              className="h-40 w-full object-contain bg-muted"
-            />
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              aria-label={`Remove ${label.toLowerCase()} image`}
-              className="absolute right-2 top-2"
-              onClick={removeImage}
-            >
-              <X aria-hidden="true" />
-            </Button>
-          </div>
-        ) : (
-          <label
-            htmlFor={imageId}
-            className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md bg-muted/40 px-3 py-4 text-sm text-muted-foreground hover:bg-muted/60"
+      <input
+        ref={imageInputRef}
+        id={imageId}
+        name={`${side}Image`}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="peer sr-only"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          revokePreviewUrl();
+          const url = URL.createObjectURL(file);
+          previewUrlRef.current = url;
+          onChange({ ...value, imageUrl: url, removeImage: false });
+        }}
+      />
+      {value.imageUrl && !value.removeImage ? (
+        <div className="relative overflow-hidden rounded-md border border-dashed border-border">
+          <Image
+            src={value.imageUrl}
+            alt={`${label} preview`}
+            width={320}
+            height={240}
+            unoptimized
+            className="h-40 w-full object-contain"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            aria-label={`Remove ${label.toLowerCase()} image`}
+            className="absolute right-2 top-2"
+            onClick={removeImage}
           >
-            <ImagePlus aria-hidden="true" className="size-4" />
-            <span>
-              {edit
-                ? `Replace ${label.toLowerCase()} image`
-                : `Add ${label.toLowerCase()} image`}
-            </span>
-            <span className="text-xs">JPEG, PNG, or WebP up to 5 MB</span>
-          </label>
-        )}
-        <input
-          ref={imageInputRef}
-          id={imageId}
-          name={`${side}Image`}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="sr-only"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            revokePreviewUrl();
-            const url = URL.createObjectURL(file);
-            previewUrlRef.current = url;
-            onChange({ ...value, imageUrl: url, removeImage: false });
-          }}
-        />
-        {edit && value.removeImage ? (
-          <input type="hidden" name={`${side}Image`} value="clear" />
-        ) : null}
-      </div>
+            <X aria-hidden="true" />
+          </Button>
+        </div>
+      ) : (
+        <label
+          htmlFor={imageId}
+          className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/40 px-3 py-4 text-sm text-muted-foreground hover:bg-muted/60 peer-focus-visible:ring-1 peer-focus-visible:ring-ring"
+        >
+          <ImagePlus aria-hidden="true" className="size-4" />
+          <span>
+            {edit
+              ? `Replace ${label.toLowerCase()} image`
+              : `Add ${label.toLowerCase()} image`}
+          </span>
+          <span className="text-xs">JPEG, PNG, or WebP up to 5 MB</span>
+        </label>
+      )}
+      {edit && value.removeImage ? (
+        <input type="hidden" name={`${side}Image`} value="clear" />
+      ) : null}
     </div>
   );
 }

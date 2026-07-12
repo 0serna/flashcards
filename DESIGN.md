@@ -160,7 +160,7 @@ Touch-friendly, calm, direct controls with consistent height and radius.
 - **Shape:** Gently rounded rectangle (8px radius).
 - **Primary:** Desk Ink background with near-white text, 36px height, 16px horizontal padding.
 - **Hover / Focus:** Hover slightly tones the background; focus uses a visible 1px ring token.
-- **Secondary / Ghost / Link:** Secondary uses the quiet neutral surface; ghost buttons remain visually silent until hover; links use underline on hover only.
+- **Secondary / Link:** Secondary uses the quiet neutral surface; links use underline on hover only.
 
 ### Cards / Containers
 
@@ -171,6 +171,12 @@ No dedicated card component is established yet. Use flat tonal surfaces before a
 - **Style:** Transparent background, 1px Soft Divider border, 8px radius, 36px height, 12px horizontal padding.
 - **Focus:** Replace ambiguity with the ring token; no animated glow or color flourish.
 - **Error / Disabled:** Error text uses Study Error Red. Disabled controls reduce opacity and block interaction.
+
+### Forms
+
+- **Surface:** Task forms use one white surface with a 1px Soft Divider border, 10px radius, and no shadow.
+- **Text areas:** Use the same border, focus, and shadow-free treatment as text inputs. Start at three lines and preserve vertical resizing for longer content.
+- **Actions:** Stack actions at full width on mobile. At `sm` and above, align compact actions to the end; use one primary action and secondary controls for alternatives or cancellation.
 
 ### Navigation
 

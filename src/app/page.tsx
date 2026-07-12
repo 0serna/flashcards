@@ -87,7 +87,7 @@ export default async function Home() {
         )}
 
         {hasArchived ? (
-          <Button asChild variant="ghost" className="mt-4 w-full">
+          <Button asChild variant="secondary" className="mt-4 w-full">
             <Link href="/decks/archived">Archived decks</Link>
           </Button>
         ) : null}

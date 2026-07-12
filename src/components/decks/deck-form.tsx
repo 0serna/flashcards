@@ -11,8 +11,10 @@ import { markFormClean } from "@/components/app/dirty-form-store";
 import { getPreviousAppPath } from "@/components/app/navigation-history-store";
 import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
 import { Button } from "@/components/ui/button";
+import { FormActions, FormSurface } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type DeckFormProps = {
   mode: "create" | "edit";
@@ -63,11 +65,7 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
   }
 
   return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit}
-      className="space-y-5 rounded-xl border border-border bg-background p-4"
-    >
+    <FormSurface ref={formRef} onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label htmlFor="deck-name">Deck name</Label>
         <Input
@@ -82,14 +80,13 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="deck-description">Description</Label>
-        <textarea
+        <Textarea
           id="deck-description"
           name="description"
-          rows={4}
+          rows={3}
           maxLength={2000}
           placeholder="Optional note about what this deck is for"
           defaultValue={deck?.description ?? ""}
-          className="flex min-h-28 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
         />
       </div>
 
@@ -99,17 +96,17 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 pt-1">
-        <Button type="submit" className="w-full" disabled={isPending}>
+      <FormActions>
+        <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
           {isPending ? "Saving…" : success ? "Saved!" : actionLabel}
         </Button>
-        <Button asChild variant="ghost" className="w-full">
+        <Button asChild variant="secondary" className="w-full sm:w-auto">
           <GuardedLink href={cancelHref} replace>
             Cancel
           </GuardedLink>
         </Button>
-      </div>
-    </form>
+      </FormActions>
+    </FormSurface>
   );
 }
 

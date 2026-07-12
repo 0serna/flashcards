@@ -1,11 +1,9 @@
-import { Archive } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { FlashcardForm } from "@/components/cards/flashcard-form";
-import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/db/client";
 import { cardDeckIdSchema, cardIdSchema } from "@/lib/cards/schema";
 import { getActiveCard } from "@/lib/cards/service";
@@ -50,27 +48,20 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
         ]}
       />
 
-      <div className="space-y-6">
-        <FlashcardForm
-          mode="edit"
-          action={updateAction}
-          cancelHref={`/decks/${deck.id}`}
-          submitLabel="Save changes"
-          initial={{
-            front: {
-              text: card.front.text ?? "",
-              imageUrl: card.front.imageUrl,
-            },
-            back: { text: card.back.text ?? "", imageUrl: card.back.imageUrl },
-          }}
-        />
-        <form action={archiveAction}>
-          <Button type="submit" variant="destructive" className="w-full">
-            <Archive aria-hidden="true" />
-            Archive card
-          </Button>
-        </form>
-      </div>
+      <FlashcardForm
+        mode="edit"
+        action={updateAction}
+        archiveAction={archiveAction}
+        cancelHref={`/decks/${deck.id}`}
+        submitLabel="Save changes"
+        initial={{
+          front: {
+            text: card.front.text ?? "",
+            imageUrl: card.front.imageUrl,
+          },
+          back: { text: card.back.text ?? "", imageUrl: card.back.imageUrl },
+        }}
+      />
     </AppScreen>
   );
 }

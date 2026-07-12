@@ -143,7 +143,7 @@ describe("deck management flow", () => {
       screen.queryByRole("group", { name: /card actions/i }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /archive card/i }),
+      screen.queryByRole("button", { name: /^archive$/i }),
     ).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /hola.*hello/i })).toHaveAttribute(
       "href",
@@ -378,7 +378,7 @@ describe("deck management flow", () => {
       screen.getByRole("button", { name: /save changes/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /archive card/i }),
+      screen.getByRole("button", { name: /^archive$/i }),
     ).toBeInTheDocument();
     expect(screen.queryByText(/stays archived/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
