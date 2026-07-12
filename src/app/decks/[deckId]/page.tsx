@@ -10,7 +10,11 @@ import { DividedList, DividedListRow } from "@/components/ui/divided-list";
 import { getDb } from "@/lib/db/client";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
 import { getAuthenticatedUser } from "@/lib/decks/service";
-import { countActiveCards, listActiveCards } from "@/lib/cards/service";
+import {
+  countActiveCards,
+  hasArchivedCards,
+  listActiveCards,
+} from "@/lib/cards/service";
 import type { Card } from "@/lib/cards/service";
 import { countDueReviewCards } from "@/lib/study/service";
 import { createClient } from "@/lib/supabase/server";
@@ -35,10 +39,11 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
     return null;
   }
 
-  const [cards, count, due] = await Promise.all([
+  const [cards, count, due, hasArchived] = await Promise.all([
     listActiveCards(getDb(), supabase, user.id, deck.id),
     countActiveCards(getDb(), user.id, deck.id),
     countDueReviewCards(getDb(), user.id, deck.id),
+    hasArchivedCards(getDb(), user.id, deck.id),
   ]);
   const safeCount = count ?? 0;
   const dueNow = due ?? 0;
@@ -151,6 +156,12 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
             );
           })}
         </DividedList>
+      ) : null}
+
+      {hasArchived ? (
+        <Button asChild variant="ghost" className="mt-4 w-full">
+          <Link href={`/decks/${deck.id}/cards/archived`}>Archived cards</Link>
+        </Button>
       ) : null}
     </AppScreen>
   );

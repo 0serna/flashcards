@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, MoreHorizontal, Pencil } from "lucide-react";
+import { MoreHorizontal, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -65,12 +65,6 @@ export function DeckActionsMenu({
             <Link href={`/decks/${deckId}/edit`}>
               <Pencil aria-hidden="true" />
               Edit deck
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" className="w-full justify-start">
-            <Link href={`/decks/${deckId}/cards/archived`}>
-              <Archive aria-hidden="true" />
-              View archived cards
             </Link>
           </Button>
           <ArchiveDeckForm action={archiveAction} />

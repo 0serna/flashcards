@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   countActiveCards: vi.fn(),
   countDueReviewCards: vi.fn(),
   getActiveCard: vi.fn(),
+  hasArchivedCards: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -36,6 +37,7 @@ vi.mock("@/lib/cards/service", () => ({
   listArchivedCards: mocks.listArchivedCards,
   countActiveCards: mocks.countActiveCards,
   getActiveCard: mocks.getActiveCard,
+  hasArchivedCards: mocks.hasArchivedCards,
 }));
 
 vi.mock("@/lib/study/service", () => ({
@@ -94,6 +96,7 @@ beforeEach(() => {
   mocks.countActiveCards.mockResolvedValue(0);
   mocks.countDueReviewCards.mockResolvedValue(0);
   mocks.getActiveCard.mockResolvedValue(card);
+  mocks.hasArchivedCards.mockResolvedValue(false);
 });
 
 afterEach(() => {
@@ -171,8 +174,9 @@ describe("deck management flow", () => {
     expect(
       screen.queryByRole("link", { name: /edit deck/i }),
     ).not.toBeInTheDocument();
+    // No archived cards by default: the discreet link must stay hidden.
     expect(
-      screen.queryByRole("link", { name: /view archived cards/i }),
+      screen.queryByRole("link", { name: /^archived cards$/i }),
     ).not.toBeInTheDocument();
     // Shared header + deck-detail breadcrumb (Home / Spanish Basics).
     expect(
@@ -199,11 +203,37 @@ describe("deck management flow", () => {
       `/decks/${deckId}/edit`,
     );
     expect(
-      screen.getByRole("link", { name: /view archived cards/i }),
-    ).toHaveAttribute("href", `/decks/${deckId}/cards/archived`);
-    expect(
       screen.getByRole("button", { name: /archive deck/i }),
     ).toBeInTheDocument();
+    // Kebab no longer carries navigation to the archived list.
+    expect(
+      screen.queryByRole("link", { name: /view archived cards/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("surfaces archived cards as a discreet link at the end of the list when archived cards exist", async () => {
+    const user = userEvent.setup();
+    mocks.countActiveCards.mockResolvedValue(1);
+    mocks.hasArchivedCards.mockResolvedValue(true);
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    expect(mocks.hasArchivedCards).toHaveBeenCalledWith({}, "user-1", deckId);
+    const archivedLink = screen.getByRole("link", {
+      name: /^archived cards$/i,
+    });
+    expect(archivedLink).toHaveAttribute(
+      "href",
+      `/decks/${deckId}/cards/archived`,
+    );
+    // Reachability: the link is visible without opening the kebab.
+    expect(archivedLink).toBeVisible();
+    // Kebab stays scoped to deck-level actions; no "View archived cards".
+    await user.click(
+      screen.getByRole("button", { name: /more deck actions/i }),
+    );
+    expect(
+      screen.queryByRole("link", { name: /view archived cards/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("surfaces study-due as the primary action when there are due flashcards", async () => {

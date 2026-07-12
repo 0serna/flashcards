@@ -427,6 +427,21 @@ export async function countActiveCards(
   return rows.length;
 }
 
+export async function hasArchivedCards(
+  db: DrizzleDb,
+  userId: string,
+  deckId: string,
+): Promise<boolean> {
+  const deck = await getOwnedActiveDeckRow(db, userId, deckId);
+  if (!deck) return false;
+  const rows = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(and(eq(cards.deckId, deckId), isNotNull(cards.archivedAt)))
+    .limit(1);
+  return rows.length > 0;
+}
+
 function validateUpdatedSide(
   label: "Front" | "Back",
   currentText: string | null,
