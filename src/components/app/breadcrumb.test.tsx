@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 describe("Breadcrumb", () => {
-  it("renders semantic nav with the full path on wider viewports", () => {
+  it("renders semantic nav with the full path", () => {
     render(
       <Breadcrumb
         items={[
@@ -39,45 +39,13 @@ describe("Breadcrumb", () => {
     expect(current).toHaveAttribute("aria-current", "page");
   });
 
-  it("hides the Home link on narrow viewports", () => {
-    render(
-      <Breadcrumb
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Spanish Basics", href: "/decks/abc" },
-          { label: "Edit card" },
-        ]}
-      />,
-    );
-
-    const home = screen.getByRole("link", { name: "Home" });
-    expect(home).toHaveClass("hidden");
-  });
-
-  it("marks the immediate parent with the mobile back-arrow affordance", () => {
-    render(
-      <Breadcrumb
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Spanish Basics", href: "/decks/abc" },
-          { label: "Edit card" },
-        ]}
-      />,
-    );
-
-    const deckLink = screen.getByRole("link", { name: "Spanish Basics" });
-    expect(deckLink.querySelector("svg")).not.toBeNull();
-  });
-
-  it("renders only parent + current for a two-item chain (Deck detail)", () => {
+  it("renders the full path for a two-item chain (Deck detail)", () => {
     render(
       <Breadcrumb
         items={[{ label: "Home", href: "/" }, { label: "Spanish Basics" }]}
       />,
     );
 
-    // In a two-item chain the Home link is the immediate parent and stays
-    // visible on mobile so the user can return home.
     const home = screen.getByRole("link", { name: "Home" });
     expect(home).toHaveAttribute("href", "/");
 

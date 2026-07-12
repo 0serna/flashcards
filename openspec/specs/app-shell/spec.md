@@ -65,14 +65,9 @@ The system SHALL render semantic contextual navigation for every nested authenti
 - **WHEN** a nested view belongs to a Deck
 - **THEN** the breadcrumb SHALL use the Deck name directly as the Deck segment and SHALL NOT require a redundant generic `Deck` segment
 
-#### Scenario: Mobile breadcrumb remains compact
+#### Scenario: Breadcrumb shows the full path on every viewport
 
-- **WHEN** a nested view is rendered at a narrow viewport
-- **THEN** the breadcrumb SHALL show the immediate parent with a visible left-arrow/back affordance and the current item in a compact row
-
-#### Scenario: Wider breadcrumb shows the full path
-
-- **WHEN** a nested view is rendered at a wider viewport
+- **WHEN** a nested view is rendered at any viewport
 - **THEN** the breadcrumb SHALL show the full available path beginning with `Home`, followed by any Deck context, and ending with the current item
 
 #### Scenario: Home remains the root destination
