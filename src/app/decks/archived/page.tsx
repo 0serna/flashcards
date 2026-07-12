@@ -27,16 +27,10 @@ export default async function ArchivedDecksPage() {
   );
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[{ label: "Home", href: "/" }, { label: "Archived decks" }]}
       />
-
-      <header className="py-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          Archived decks
-        </h1>
-      </header>
 
       {decks.length > 0 ? (
         <DividedList>

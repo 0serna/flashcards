@@ -59,8 +59,8 @@ describe("ArchivedDecksPage", () => {
 
     expect(mocks.listArchivedDecks).toHaveBeenCalledWith({}, "user-1");
     expect(
-      screen.getByRole("heading", { name: /archived decks/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /archived decks/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Biology Terms")).toBeInTheDocument();
     expect(screen.getByText(/2 cards/i)).toBeInTheDocument();
     expect(

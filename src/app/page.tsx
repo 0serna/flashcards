@@ -35,13 +35,13 @@ export default async function Home() {
 
   return (
     <AppScreen signOutAction={signOutAction}>
-      <section className="mt-8 flex-1">
+      <section className="mt-3 flex-1">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold tracking-tight">Your decks</h2>
           <Button asChild variant="secondary" size="sm">
             <Link href="/decks/new">
               <Plus aria-hidden="true" />
-              Create a new deck
+              Create deck
             </Link>
           </Button>
         </div>

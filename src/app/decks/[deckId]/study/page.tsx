@@ -72,7 +72,7 @@ export default async function StudyPage({
   const modeLabel = resolvedMode === "review" ? "Review" : "Practice";
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
@@ -81,9 +81,6 @@ export default async function StudyPage({
         ]}
       />
 
-      <h1 className="text-2xl font-semibold tracking-tight text-balance pb-6 pt-4">
-        {modeLabel}
-      </h1>
       <StudySession
         mode={resolvedMode}
         deckId={deck.id}

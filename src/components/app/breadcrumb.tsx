@@ -20,7 +20,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
   const lastIndex = items.length - 1;
 
   return (
-    <nav aria-label="Breadcrumb" className="text-sm">
+    <nav aria-label="Breadcrumb" className="mb-2 text-sm">
       <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
         {items.map((item, index) => {
           const isCurrent = index === lastIndex;
@@ -33,7 +33,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
               >
                 <span
                   aria-current="page"
-                  className="truncate font-medium text-foreground"
+                  className="flex min-h-9 min-w-0 items-center truncate font-medium text-foreground"
                 >
                   {item.label}
                 </span>

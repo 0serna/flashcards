@@ -38,8 +38,6 @@ describe("DeckForm dirty-form behavior", () => {
 
     render(
       <DeckFormShell
-        title="Create deck"
-        description="x"
         breadcrumbItems={[
           { label: "Home", href: "/" },
           { label: "Create deck" },
@@ -121,8 +119,6 @@ describe("DeckForm dirty-form behavior", () => {
 
     render(
       <DeckFormShell
-        title="Create deck"
-        description="x"
         breadcrumbItems={[
           { label: "Home", href: "/" },
           { label: "Create deck" },
@@ -146,8 +142,6 @@ describe("DeckForm dirty-form behavior", () => {
 
     render(
       <DeckFormShell
-        title="Edit deck"
-        description="x"
         breadcrumbItems={[
           { label: "Home", href: "/" },
           { label: "Spanish Basics", href: "/decks/abc" },

@@ -16,10 +16,8 @@ export default async function EditDeckPage({ params }: EditDeckPageProps) {
   const updateAction = updateDeckAction.bind(null, deck.id);
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <DeckFormShell
-        title="Edit deck"
-        description="Rename the deck or adjust its note. Cards and study history stay unchanged."
         breadcrumbItems={[
           { label: "Home", href: "/" },
           { label: deck.name, href: `/decks/${deck.id}` },

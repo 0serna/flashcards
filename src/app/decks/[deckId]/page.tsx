@@ -1,4 +1,10 @@
-import { ChevronRight, ImageIcon, Plus } from "lucide-react";
+import {
+  ChevronRight,
+  ImageIcon,
+  Plus,
+  RotateCcw,
+  Shuffle,
+} from "lucide-react";
 import Link from "next/link";
 
 import { signOutAction } from "@/app/auth/actions";
@@ -51,27 +57,32 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const archiveAction = archiveDeckAction.bind(null, deck.id);
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[{ label: "Home", href: "/" }, { label: deck.name }]}
       />
 
-      <header className="space-y-3 py-2">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-balance">
-            {deck.name}
-          </h1>
-          <DeckActionsMenu deckId={deck.id} archiveAction={archiveAction} />
-        </div>
+      <header className={safeCount > 0 ? "mb-3 py-2" : "py-2"}>
         {safeCount > 0 ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-stretch gap-2">
             {dueNow > 0 ? (
-              <Button asChild size="sm">
+              <Button
+                asChild
+                size="sm"
+                className="min-w-0 flex-1 justify-start px-2.5 py-2.5 text-left transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transform-none sm:px-3"
+              >
                 <Link
                   href={`/decks/${deck.id}/study?mode=review`}
                   prefetch={false}
+                  aria-label={`Study ${dueNow} due`}
                 >
-                  Study {dueNow} due
+                  <RotateCcw aria-hidden="true" />
+                  <span className="flex flex-col items-start leading-tight">
+                    <span>Study</span>
+                    <span className="mt-1 text-xs font-normal text-primary-foreground/80">
+                      {dueNow} due now
+                    </span>
+                  </span>
                 </Link>
               </Button>
             ) : null}
@@ -79,12 +90,20 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
               asChild
               size="sm"
               variant={dueNow > 0 ? "secondary" : "default"}
+              className="min-w-0 flex-1 justify-start px-2.5 py-2.5 text-left transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transform-none sm:px-3"
             >
               <Link
                 href={`/decks/${deck.id}/study?mode=practice`}
                 prefetch={false}
+                aria-label="Practice random"
               >
-                Practice random
+                <Shuffle aria-hidden="true" />
+                <span className="flex flex-col items-start leading-tight">
+                  <span>Practice</span>
+                  <span className="mt-1 text-xs font-normal text-foreground/70">
+                    Random order
+                  </span>
+                </span>
               </Link>
             </Button>
           </div>
@@ -99,16 +118,19 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
           >
             Cards ({safeCount})
           </h2>
-          <Button
-            asChild
-            size="sm"
-            variant={safeCount > 0 ? "secondary" : "default"}
-          >
-            <Link href={`/decks/${deck.id}/cards/new`}>
-              <Plus aria-hidden="true" />
-              Add card
-            </Link>
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              asChild
+              size="sm"
+              variant={safeCount > 0 ? "secondary" : "default"}
+            >
+              <Link href={`/decks/${deck.id}/cards/new`}>
+                <Plus aria-hidden="true" />
+                Add card
+              </Link>
+            </Button>
+            <DeckActionsMenu deckId={deck.id} archiveAction={archiveAction} />
+          </div>
         </div>
 
         {safeCards.length > 0 ? (

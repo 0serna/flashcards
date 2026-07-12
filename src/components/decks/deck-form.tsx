@@ -114,29 +114,17 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
 }
 
 type DeckFormShellProps = {
-  title: string;
-  description: string;
   breadcrumbItems: BreadcrumbItem[];
   children: React.ReactNode;
 };
 
 export function DeckFormShell({
-  title,
-  description,
   breadcrumbItems,
   children,
 }: DeckFormShellProps) {
   return (
     <>
       <Breadcrumb items={breadcrumbItems} />
-      <header className="py-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          {title}
-        </h1>
-        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-          {description}
-        </p>
-      </header>
       {children}
     </>
   );

@@ -169,7 +169,7 @@ export function StudySession({
 
   return (
     <ViewTransition name="study-card" default="none">
-      <div className="space-y-7">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">
             {mode === "review" ? "Review" : "Practice"} · {index + 1}/
@@ -243,7 +243,7 @@ export function StudySession({
         ) : null}
 
         {revealed ? (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="flex gap-2">
             {RATING_ORDER.map((rating, ratingIndex) => (
               <Button
                 key={rating}
@@ -251,7 +251,8 @@ export function StudySession({
                 variant="outline"
                 disabled={pending}
                 onClick={() => handleRate(rating)}
-                className={styles.ratingButton}
+                className={cn("min-w-0 flex-1 px-2", styles.ratingButton)}
+                data-rating={rating}
                 data-just-rated={justRated === rating ? "true" : undefined}
                 style={{ ["--rating-i" as string]: ratingIndex }}
               >
@@ -300,7 +301,7 @@ function CardFace({
               });
             }
           }}
-          className="h-auto max-h-72 w-auto max-w-full rounded-lg border border-border object-contain"
+          className="h-auto max-h-52 w-auto max-w-full rounded-lg border border-border object-contain sm:max-h-64"
         />
       ) : null}
       {!text && !imageUrl ? (

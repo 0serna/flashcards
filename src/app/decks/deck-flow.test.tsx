@@ -108,8 +108,8 @@ describe("deck management flow", () => {
     render(<NewDeckPage />);
 
     expect(
-      screen.getByRole("heading", { name: /create deck/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /create deck/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByLabelText(/deck name/i)).toBeRequired();
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
     expect(
@@ -157,14 +157,16 @@ describe("deck management flow", () => {
 
     render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
 
-    const deckTitle = screen.getByRole("heading", { name: "Spanish Basics" });
+    const breadcrumb = screen.getByRole("navigation", { name: /breadcrumb/i });
+    const deckLabel = within(breadcrumb).getByText("Spanish Basics");
     const cardSection = screen.getByRole("region", { name: /cards/i });
     const cardsHeading = within(cardSection).getByRole("heading", {
       name: /cards.*1/i,
     });
 
+    expect(deckLabel).toHaveAttribute("aria-current", "page");
     expect(
-      deckTitle.compareDocumentPosition(cardsHeading) &
+      breadcrumb.compareDocumentPosition(cardsHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
@@ -307,8 +309,8 @@ describe("deck management flow", () => {
 
     expect(mocks.getActiveDeck).toHaveBeenCalledWith({}, "user-1", deckId);
     expect(
-      screen.getByRole("heading", { name: /edit deck/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /edit deck/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByDisplayValue("Spanish Basics")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /save changes/i }),
@@ -334,8 +336,8 @@ describe("deck management flow", () => {
 
     expect(mocks.getActiveDeck).toHaveBeenCalledWith({}, "user-1", deckId);
     expect(
-      screen.getByRole("heading", { name: /add the first card/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /add the first card/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByLabelText("Front")).toBeInTheDocument();
     expect(screen.getByLabelText("Back")).toBeInTheDocument();
     expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
@@ -368,8 +370,8 @@ describe("deck management flow", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /edit card/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /edit card/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByDisplayValue("Hola")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Hello")).toBeInTheDocument();
     expect(
@@ -397,8 +399,8 @@ describe("deck management flow", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /archived cards/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: /archived cards/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Hola")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /restore card/i }),

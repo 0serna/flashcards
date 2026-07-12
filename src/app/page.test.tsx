@@ -73,9 +73,10 @@ describe("Home", () => {
     expect(container.firstElementChild).toHaveClass("bg-secondary/30");
     expect(mocks.listActiveDecks).toHaveBeenCalledWith({}, "user-1");
     expect(mocks.hasArchivedDecks).toHaveBeenCalledWith({}, "user-1");
-    expect(
-      screen.getByRole("link", { name: /create a new deck/i }),
-    ).toHaveAttribute("href", "/decks/new");
+    expect(screen.getByRole("link", { name: /create deck/i })).toHaveAttribute(
+      "href",
+      "/decks/new",
+    );
     expect(
       screen.getByRole("link", { name: /spanish basics/i }),
     ).toHaveAttribute("href", `/decks/${deckId}`);

@@ -19,7 +19,7 @@ export default async function AddFirstCardPage({
   const saveAnotherAction = createCardAction.bind(null, deck.id, "new-card");
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
@@ -27,16 +27,6 @@ export default async function AddFirstCardPage({
           { label: "Add card" },
         ]}
       />
-
-      <header className="py-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          Add the first card
-        </h1>
-        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-          Front and back can each include text, an image, or both. Save to
-          return to the deck or save and add another to keep building.
-        </p>
-      </header>
 
       <FlashcardForm
         mode="create"

@@ -41,7 +41,7 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
   const archiveAction = archiveCardAction.bind(null, deck.id, card.id);
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
@@ -49,12 +49,6 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
           { label: "Edit card" },
         ]}
       />
-
-      <header className="py-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          Edit card
-        </h1>
-      </header>
 
       <div className="space-y-6">
         <FlashcardForm

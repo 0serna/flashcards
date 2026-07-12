@@ -33,7 +33,7 @@ export default async function ArchivedCardsPage({
   const cards = await listArchivedCards(getDb(), supabase, user.id, deck.id);
 
   return (
-    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
+    <AppScreen contentClassName="pb-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
@@ -42,15 +42,10 @@ export default async function ArchivedCardsPage({
         ]}
       />
 
-      <header className="py-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          Archived cards
-        </h1>
-        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-          Restored cards return to the active deck. Their text and images stay
-          intact while archived.
-        </p>
-      </header>
+      <p className="max-w-sm py-4 text-base leading-7 text-muted-foreground">
+        Restored cards return to the active deck. Their text and images stay
+        intact while archived.
+      </p>
 
       {cards && cards.length > 0 ? (
         <DividedList>
