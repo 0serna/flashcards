@@ -293,6 +293,18 @@ describe("deck management flow", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps random practice secondary when it is the only study action", async () => {
+    mocks.countActiveCards.mockResolvedValue(5);
+
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    const practiceLink = screen.getByRole("link", {
+      name: /practice random/i,
+    });
+    expect(practiceLink).toHaveClass("bg-secondary");
+    expect(practiceLink).not.toHaveClass("bg-primary");
+  });
+
   it("surfaces study-due as the primary action when there are due cards", async () => {
     mocks.countActiveCards.mockResolvedValue(5);
     mocks.countDueReviewCards.mockResolvedValue(3);

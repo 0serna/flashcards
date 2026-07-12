@@ -89,7 +89,7 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
             <Button
               asChild
               size="sm"
-              variant={dueNow > 0 ? "secondary" : "default"}
+              variant="secondary"
               className="min-w-0 flex-1 justify-start px-2.5 py-2.5 text-left transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transform-none sm:px-3"
             >
               <Link
