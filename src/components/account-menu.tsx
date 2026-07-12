@@ -39,7 +39,7 @@ export function AccountMenu({
     <div ref={rootRef} className="relative shrink-0">
       <Button
         type="button"
-        variant="secondary"
+        variant="ghost"
         size="icon"
         aria-label="Account menu"
         aria-controls={open ? menuId : undefined}
