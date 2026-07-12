@@ -1,9 +1,11 @@
+import { Archive } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { FlashcardForm } from "@/components/cards/flashcard-form";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/db/client";
 import { cardDeckIdSchema, cardIdSchema } from "@/lib/cards/schema";
 import { getActiveCard } from "@/lib/cards/service";
@@ -11,7 +13,7 @@ import { getAuthenticatedUser } from "@/lib/decks/service";
 import { createClient } from "@/lib/supabase/server";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
 
-import { updateCardAction } from "../../../../cards/actions";
+import { archiveCardAction, updateCardAction } from "../../../../cards/actions";
 
 type EditCardPageProps = {
   params: Promise<{ deckId: string; cardId: string }>;
@@ -32,6 +34,7 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
   if (!card) notFound();
 
   const updateAction = updateCardAction.bind(null, deck.id, card.id);
+  const archiveAction = archiveCardAction.bind(null, deck.id, card.id);
 
   return (
     <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
@@ -53,16 +56,27 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
         </p>
       </header>
 
-      <FlashcardForm
-        mode="edit"
-        action={updateAction}
-        cancelHref={`/decks/${deck.id}`}
-        submitLabel="Save changes"
-        initial={{
-          front: { text: card.front.text ?? "", imageUrl: card.front.imageUrl },
-          back: { text: card.back.text ?? "", imageUrl: card.back.imageUrl },
-        }}
-      />
+      <div className="space-y-6">
+        <FlashcardForm
+          mode="edit"
+          action={updateAction}
+          cancelHref={`/decks/${deck.id}`}
+          submitLabel="Save changes"
+          initial={{
+            front: {
+              text: card.front.text ?? "",
+              imageUrl: card.front.imageUrl,
+            },
+            back: { text: card.back.text ?? "", imageUrl: card.back.imageUrl },
+          }}
+        />
+        <form action={archiveAction}>
+          <Button type="submit" variant="destructive" className="w-full">
+            <Archive aria-hidden="true" />
+            Archive card
+          </Button>
+        </form>
+      </div>
     </AppScreen>
   );
 }

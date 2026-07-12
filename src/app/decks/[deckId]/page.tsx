@@ -1,10 +1,9 @@
-import { ImageIcon, Plus } from "lucide-react";
+import { ChevronRight, ImageIcon, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
-import { CardActionsMenu } from "@/components/cards/card-actions-menu";
 import { DeckActionsMenu } from "@/components/decks/deck-actions-menu";
 import { Button } from "@/components/ui/button";
 import { DividedList, DividedListRow } from "@/components/ui/divided-list";
@@ -16,7 +15,6 @@ import type { Card } from "@/lib/cards/service";
 import { countDueReviewCards } from "@/lib/study/service";
 import { createClient } from "@/lib/supabase/server";
 
-import { archiveCardAction } from "../cards/actions";
 import { archiveDeckAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -112,42 +110,43 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
       {safeCards.length > 0 ? (
         <DividedList>
           {safeCards.map((card) => {
-            const cardArchiveAction = archiveCardAction.bind(
-              null,
-              deck.id,
-              card.id,
-            );
+            const frontText = card.front.text ?? "Image only";
+            const backText = card.back.text ?? "Image only";
             return (
-              <DividedListRow key={card.id}>
-                <div className="min-w-0 space-y-1">
-                  <p className="flex min-w-0 items-center gap-2 break-words text-sm font-medium">
-                    {sideHasImage(card.front) ? (
-                      <ImageIcon
-                        aria-label="Front has image"
-                        className="size-3.5 shrink-0 text-muted-foreground"
-                      />
-                    ) : null}
-                    <span className="min-w-0 break-words">
-                      {card.front.text ?? "Image only"}
+              <DividedListRow
+                key={card.id}
+                asChild
+                className="transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <Link
+                  href={`/decks/${deck.id}/cards/${card.id}/edit`}
+                  aria-label={`Edit card: ${frontText}, ${backText}`}
+                >
+                  <span className="min-w-0 space-y-1">
+                    <span className="flex min-w-0 items-center gap-2 break-words text-sm font-medium">
+                      {sideHasImage(card.front) ? (
+                        <ImageIcon
+                          aria-label="Front has image"
+                          className="size-3.5 shrink-0 text-muted-foreground"
+                        />
+                      ) : null}
+                      <span className="min-w-0 break-words">{frontText}</span>
                     </span>
-                  </p>
-                  <p className="flex min-w-0 items-center gap-2 break-words text-sm text-muted-foreground">
-                    {sideHasImage(card.back) ? (
-                      <ImageIcon
-                        aria-label="Back has image"
-                        className="size-3.5 shrink-0"
-                      />
-                    ) : null}
-                    <span className="min-w-0 break-words">
-                      {card.back.text ?? "Image only"}
+                    <span className="flex min-w-0 items-center gap-2 break-words text-sm text-muted-foreground">
+                      {sideHasImage(card.back) ? (
+                        <ImageIcon
+                          aria-label="Back has image"
+                          className="size-3.5 shrink-0"
+                        />
+                      ) : null}
+                      <span className="min-w-0 break-words">{backText}</span>
                     </span>
-                  </p>
-                </div>
-                <CardActionsMenu
-                  deckId={deck.id}
-                  cardId={card.id}
-                  archiveAction={cardArchiveAction}
-                />
+                  </span>
+                  <ChevronRight
+                    className="size-4 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                </Link>
               </DividedListRow>
             );
           })}

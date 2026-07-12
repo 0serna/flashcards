@@ -120,8 +120,7 @@ describe("deck management flow", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders each flashcard with compact actions in a kebab menu", async () => {
-    const user = userEvent.setup();
+  it("renders each flashcard as a clickable row that opens the edit view", async () => {
     mocks.listActiveCards.mockResolvedValue([card]);
     mocks.countActiveCards.mockResolvedValue(1);
 
@@ -133,29 +132,18 @@ describe("deck management flow", () => {
     expect(screen.getByText("Hola")).toBeInTheDocument();
     expect(screen.getByText("Hello")).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /edit card/i }),
+      screen.queryByRole("button", { name: /more card actions/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("group", { name: /card actions/i }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /archive card/i }),
     ).not.toBeInTheDocument();
-
-    const actionsButton = screen.getByRole("button", {
-      name: /more card actions/i,
-    });
-    await user.click(actionsButton);
-
-    expect(actionsButton).toHaveAttribute("aria-haspopup", "menu");
-    expect(actionsButton).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByRole("group", { name: /card actions/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /edit card/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /hola.*hello/i })).toHaveAttribute(
       "href",
       `/decks/${deckId}/cards/${cardId}/edit`,
     );
-    expect(
-      screen.getByRole("button", { name: /archive card/i }),
-    ).toBeInTheDocument();
   });
 
   it("marks compact front and back previews when a flashcard side has an image", async () => {
@@ -292,7 +280,7 @@ describe("deck management flow", () => {
     ).toHaveAttribute("href", `/decks/${deckId}`);
   });
 
-  it("preloads card text when editing a card", async () => {
+  it("preloads card text when editing a card and exposes the archive action", async () => {
     render(
       await EditCardPage({
         params: Promise.resolve({ deckId, cardId }),
@@ -306,6 +294,9 @@ describe("deck management flow", () => {
     expect(screen.getByDisplayValue("Hello")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /save changes/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /archive card/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/active card/i)).toBeInTheDocument();
     expect(screen.queryByText(/stays archived/i)).not.toBeInTheDocument();
