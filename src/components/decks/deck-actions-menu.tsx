@@ -16,6 +16,7 @@ export function DeckActionsMenu({
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const menuId = `deck-actions-${deckId}`;
 
   useEffect(() => {
@@ -28,7 +29,10 @@ export function DeckActionsMenu({
     }
 
     function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Escape") return;
+
+      setOpen(false);
+      triggerRef.current?.focus();
     }
 
     document.addEventListener("mousedown", closeOnOutsideClick);
@@ -42,13 +46,13 @@ export function DeckActionsMenu({
   return (
     <div ref={rootRef} className="relative shrink-0">
       <Button
+        ref={triggerRef}
         type="button"
         variant="ghost"
         size="icon"
         aria-label="More deck actions"
         aria-controls={open ? menuId : undefined}
         aria-expanded={open}
-        aria-haspopup="menu"
         onClick={() => setOpen((current) => !current)}
       >
         <MoreHorizontal aria-hidden="true" />

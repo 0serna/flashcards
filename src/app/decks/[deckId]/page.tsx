@@ -60,33 +60,35 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
         items={[{ label: "Home", href: "/" }, { label: deck.name }]}
       />
 
-      <header className="space-y-4 py-6">
+      <header className="space-y-3 py-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-balance">
-              {deck.name}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {dueNow > 0
-                ? `${dueNow} due now · ${safeCount} ${safeCount === 1 ? "card" : "cards"}`
-                : `${safeCount} ${safeCount === 1 ? "card" : "cards"}`}
-            </p>
-          </div>
+          <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-balance">
+            {deck.name}
+          </h1>
           <DeckActionsMenu deckId={deck.id} archiveAction={archiveAction} />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {dueNow > 0 ? (
-            <Button asChild size="sm">
-              <Link
-                href={`/decks/${deck.id}/study?mode=review`}
-                prefetch={false}
-              >
-                Study due
-              </Link>
-            </Button>
-          ) : null}
-          {safeCount > 0 ? (
-            <Button asChild size="sm" variant="secondary">
+        {deck.description ? (
+          <p className="max-w-[70ch] text-sm leading-6 text-muted-foreground">
+            {deck.description}
+          </p>
+        ) : null}
+        {safeCount > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {dueNow > 0 ? (
+              <Button asChild size="sm">
+                <Link
+                  href={`/decks/${deck.id}/study?mode=review`}
+                  prefetch={false}
+                >
+                  Study {dueNow} due
+                </Link>
+              </Button>
+            ) : null}
+            <Button
+              asChild
+              size="sm"
+              variant={dueNow > 0 ? "secondary" : "default"}
+            >
               <Link
                 href={`/decks/${deck.id}/study?mode=practice`}
                 prefetch={false}
@@ -94,66 +96,80 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
                 Practice random
               </Link>
             </Button>
-          ) : null}
-          <Button asChild size="sm" variant="ghost">
+          </div>
+        ) : null}
+      </header>
+
+      <section aria-labelledby="cards-heading" className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2
+            id="cards-heading"
+            className="text-base font-semibold tracking-tight"
+          >
+            Cards ({safeCount})
+          </h2>
+          <Button
+            asChild
+            size="sm"
+            variant={safeCount > 0 ? "secondary" : "default"}
+          >
             <Link href={`/decks/${deck.id}/cards/new`}>
               <Plus aria-hidden="true" />
               Add card
             </Link>
           </Button>
         </div>
-        {deck.description ? (
-          <p className="text-sm leading-6 text-muted-foreground">
-            {deck.description}
-          </p>
-        ) : null}
-      </header>
 
-      {safeCards.length > 0 ? (
-        <DividedList>
-          {safeCards.map((card) => {
-            const frontText = card.front.text ?? "Image only";
-            const backText = card.back.text ?? "Image only";
-            return (
-              <DividedListRow
-                key={card.id}
-                asChild
-                className="transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <Link
-                  href={`/decks/${deck.id}/cards/${card.id}/edit`}
-                  aria-label={`Edit card: ${frontText}, ${backText}`}
+        {safeCards.length > 0 ? (
+          <DividedList>
+            {safeCards.map((card) => {
+              const frontText = card.front.text ?? "Image only";
+              const backText = card.back.text ?? "Image only";
+              return (
+                <DividedListRow
+                  key={card.id}
+                  asChild
+                  className="transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <span className="min-w-0 space-y-1">
-                    <span className="flex min-w-0 items-center gap-2 break-words text-sm font-medium">
-                      {sideHasImage(card.front) ? (
-                        <ImageIcon
-                          aria-label="Front has image"
-                          className="size-3.5 shrink-0 text-muted-foreground"
-                        />
-                      ) : null}
-                      <span className="min-w-0 break-words">{frontText}</span>
+                  <Link
+                    href={`/decks/${deck.id}/cards/${card.id}/edit`}
+                    aria-label={`Edit card: ${frontText}, ${backText}`}
+                  >
+                    <span className="min-w-0 space-y-1">
+                      <span className="flex min-w-0 items-center gap-2 break-words text-sm font-medium">
+                        {sideHasImage(card.front) ? (
+                          <ImageIcon
+                            aria-label="Front has image"
+                            className="size-3.5 shrink-0 text-muted-foreground"
+                          />
+                        ) : null}
+                        <span className="min-w-0 break-words">{frontText}</span>
+                      </span>
+                      <span className="flex min-w-0 items-center gap-2 break-words text-sm text-muted-foreground">
+                        {sideHasImage(card.back) ? (
+                          <ImageIcon
+                            aria-label="Back has image"
+                            className="size-3.5 shrink-0"
+                          />
+                        ) : null}
+                        <span className="min-w-0 break-words">{backText}</span>
+                      </span>
                     </span>
-                    <span className="flex min-w-0 items-center gap-2 break-words text-sm text-muted-foreground">
-                      {sideHasImage(card.back) ? (
-                        <ImageIcon
-                          aria-label="Back has image"
-                          className="size-3.5 shrink-0"
-                        />
-                      ) : null}
-                      <span className="min-w-0 break-words">{backText}</span>
-                    </span>
-                  </span>
-                  <ChevronRight
-                    className="size-4 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                </Link>
-              </DividedListRow>
-            );
-          })}
-        </DividedList>
-      ) : null}
+                    <ChevronRight
+                      className="size-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </DividedListRow>
+              );
+            })}
+          </DividedList>
+        ) : (
+          <p className="text-sm leading-6 text-muted-foreground">
+            No cards yet. Add one to start studying this deck.
+          </p>
+        )}
+      </section>
 
       {hasArchived ? (
         <Button asChild variant="ghost" className="mt-4 w-full">

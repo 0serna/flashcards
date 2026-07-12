@@ -131,7 +131,9 @@ describe("deck management flow", () => {
 
     expect(mocks.listActiveCards).toHaveBeenCalled();
     expect(mocks.countActiveCards).toHaveBeenCalled();
-    expect(screen.getByText("1 card")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Cards (1)" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Hola")).toBeInTheDocument();
     expect(screen.getByText("Hello")).toBeInTheDocument();
     expect(
@@ -147,6 +149,47 @@ describe("deck management flow", () => {
       "href",
       `/decks/${deckId}/cards/${cardId}/edit`,
     );
+  });
+
+  it("places deck context before a card collection headed by its count", async () => {
+    mocks.listActiveCards.mockResolvedValue([card]);
+    mocks.countActiveCards.mockResolvedValue(1);
+
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    const description = screen.getByText("Everyday words and short phrases.");
+    const cardSection = screen.getByRole("region", { name: /cards/i });
+    const cardsHeading = within(cardSection).getByRole("heading", {
+      name: /cards.*1/i,
+    });
+
+    expect(
+      description.compareDocumentPosition(cardsHeading) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      within(cardSection).getByRole("link", { name: /^add card$/i }),
+    ).toHaveAttribute("href", `/decks/${deckId}/cards/new`);
+  });
+
+  it("guides an empty deck toward adding its first card", async () => {
+    render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
+
+    const cardSection = screen.getByRole("region", { name: "Cards (0)" });
+    expect(
+      within(cardSection).getByText(
+        "No cards yet. Add one to start studying this deck.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(cardSection).getByRole("link", { name: /^add card$/i }),
+    ).toHaveAttribute("href", `/decks/${deckId}/cards/new`);
+    expect(
+      screen.queryByRole("link", { name: /study/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /practice random/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("marks compact front and back previews when a flashcard side has an image", async () => {
@@ -193,7 +236,7 @@ describe("deck management flow", () => {
     });
     await user.click(actionsButton);
 
-    expect(actionsButton).toHaveAttribute("aria-haspopup", "menu");
+    expect(actionsButton).not.toHaveAttribute("aria-haspopup");
     expect(actionsButton).toHaveAttribute("aria-expanded", "true");
     expect(
       screen.getByRole("group", { name: /deck actions/i }),
@@ -209,6 +252,14 @@ describe("deck management flow", () => {
     expect(
       screen.queryByRole("link", { name: /view archived cards/i }),
     ).not.toBeInTheDocument();
+
+    screen.getByRole("link", { name: /edit deck/i }).focus();
+    await user.keyboard("{Escape}");
+
+    expect(
+      screen.queryByRole("group", { name: /deck actions/i }),
+    ).not.toBeInTheDocument();
+    expect(actionsButton).toHaveFocus();
   });
 
   it("surfaces archived cards as a discreet link at the end of the list when archived cards exist", async () => {
@@ -242,8 +293,7 @@ describe("deck management flow", () => {
 
     render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
 
-    expect(screen.getByText(/3 due now/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /study due/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Study 3 due" })).toHaveAttribute(
       "href",
       `/decks/${deckId}/study?mode=review`,
     );

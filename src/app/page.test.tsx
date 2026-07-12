@@ -74,9 +74,6 @@ describe("Home", () => {
     expect(mocks.listActiveDecks).toHaveBeenCalledWith({}, "user-1");
     expect(mocks.hasArchivedDecks).toHaveBeenCalledWith({}, "user-1");
     expect(
-      screen.getByRole("heading", { name: /what do you want to study today/i }),
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole("link", { name: /create a new deck/i }),
     ).toHaveAttribute("href", "/decks/new");
     expect(
