@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
+import { PendingActionForm } from "@/components/app/pending-action-form";
 import { AppScreen } from "@/components/app-screen";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,7 +66,7 @@ export default async function ArchivedCardsPage({
                     {card.back.text ?? "Image only"}
                   </p>
                 </div>
-                <form action={restoreAction}>
+                <PendingActionForm action={restoreAction}>
                   <Button
                     type="submit"
                     variant="secondary"
@@ -73,7 +74,7 @@ export default async function ArchivedCardsPage({
                   >
                     Restore card
                   </Button>
-                </form>
+                </PendingActionForm>
               </DividedListStackedRow>
             );
           })}

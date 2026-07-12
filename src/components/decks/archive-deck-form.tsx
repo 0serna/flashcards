@@ -1,5 +1,6 @@
 import { Archive } from "lucide-react";
 
+import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
 import { Button } from "@/components/ui/button";
 
 export function ArchiveDeckForm({
@@ -8,7 +9,10 @@ export function ArchiveDeckForm({
   action: () => void | Promise<void>;
 }) {
   return (
-    <form action={action}>
+    <form
+      action={() => runWithPendingMutation(() => action())}
+      data-archive-deck-form
+    >
       <Button
         type="submit"
         variant="destructive"

@@ -4,6 +4,7 @@ import type React from "react";
 import { cn } from "@/lib/utils";
 
 import { Header } from "./app/header";
+import { HistoryBoundary } from "./app/history-boundary";
 import { NavigationHistoryTracker } from "./app/navigation-history-tracker";
 import { NavigationLoading } from "./app/navigation-loading";
 
@@ -58,6 +59,7 @@ export function AppScreen({
       >
         {signOutAction && !isCentered ? (
           <>
+            <HistoryBoundary />
             <NavigationHistoryTracker />
             <Suspense fallback={null}>
               <NavigationLoading />

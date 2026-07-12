@@ -10,6 +10,7 @@ import { markFormClean } from "@/components/app/dirty-form-store";
 import { getPreviousAppPath } from "@/components/app/navigation-history-store";
 import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
 import { PrivateCardImage } from "@/components/cards/private-card-image";
+import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
 import { Button } from "@/components/ui/button";
 import { FormActions, FormSurface } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
@@ -94,7 +95,10 @@ export function CardForm({
     }
 
     try {
-      await selectedAction(await optimizeFormDataImages(formData));
+      await runWithPendingMutation(async () => {
+        const optimized = await optimizeFormDataImages(formData);
+        await selectedAction(optimized);
+      });
       return true;
     } catch (error) {
       if (error instanceof FormImageError) {
@@ -231,7 +235,11 @@ export function CardForm({
             type="submit"
             formAction={async (formData) => {
               setPendingAction("archive");
-              await archiveAction(formData);
+              try {
+                await runWithPendingMutation(() => archiveAction(formData));
+              } finally {
+                setPendingAction(null);
+              }
             }}
             variant="destructive"
             className="w-full sm:w-auto"

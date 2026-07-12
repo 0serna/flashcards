@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const NAVIGATION_DELAY_MS = 150;
 const NAVIGATION_START_EVENT = "cards:navigation-start";
+const NAVIGATION_CANCEL_EVENT = "cards:navigation-cancel";
 
 /**
  * Starts the shared authenticated navigation feedback after the configured
@@ -14,6 +15,13 @@ const NAVIGATION_START_EVENT = "cards:navigation-start";
  */
 export function announceNavigationStart() {
   document.dispatchEvent(new Event(NAVIGATION_START_EVENT));
+}
+
+/** Clears feedback when a history gesture is intentionally absorbed. */
+export function cancelNavigationLoading() {
+  setTimeout(() => {
+    document.dispatchEvent(new Event(NAVIGATION_CANCEL_EVENT));
+  }, 0);
 }
 
 function isInternalNavigation(event: MouseEvent) {
@@ -92,15 +100,17 @@ export function NavigationLoading() {
 
     document.addEventListener("click", handleClick);
     document.addEventListener(NAVIGATION_START_EVENT, startLoading);
+    document.addEventListener(NAVIGATION_CANCEL_EVENT, clearLoading);
     window.addEventListener("popstate", handleHistoryNavigation);
 
     return () => {
       document.removeEventListener("click", handleClick);
       document.removeEventListener(NAVIGATION_START_EVENT, startLoading);
+      document.removeEventListener(NAVIGATION_CANCEL_EVENT, clearLoading);
       window.removeEventListener("popstate", handleHistoryNavigation);
       if (delayTimer.current) clearTimeout(delayTimer.current);
     };
-  }, [startLoading]);
+  }, [clearLoading, startLoading]);
 
   if (!isLoading) return null;
 

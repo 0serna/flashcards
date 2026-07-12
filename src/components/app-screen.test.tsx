@@ -3,6 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AppScreen } from "./app-screen";
 
+// The history boundary attaches a popstate listener on mount. Mock it so
+// tests stay focused on shell layout and content placement.
+vi.mock("./app/history-boundary", () => ({
+  HistoryBoundary: () => null,
+}));
+
 afterEach(cleanup);
 
 describe("AppScreen", () => {
@@ -85,5 +91,18 @@ describe("AppScreen", () => {
 
     expect(fillShell).toHaveClass("max-w-md");
     expect(centeredShell).toHaveClass("max-w-md");
+  });
+
+  it("does not mount the authenticated header in the centered variant", () => {
+    // /login, error.tsx, and global-error.tsx all use the centered
+    // variant. None of them should host the authenticated header or the
+    // history boundary.
+    render(
+      <AppScreen variant="centered">
+        <p>Login</p>
+      </AppScreen>,
+    );
+
+    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
   });
 });

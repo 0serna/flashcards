@@ -9,6 +9,7 @@ import { ViewTransition } from "react";
 import { PrivateCardImage } from "@/components/cards/private-card-image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
 
 import { preloadUpcomingImages } from "./preload-study-images";
 import styles from "./study-session.module.css";
@@ -178,7 +179,9 @@ export function StudySession({
     setPending(true);
     setError(null);
     setJustRated(rating);
-    const result = await submitRating(current.id, rating);
+    const result = await runWithPendingMutation(() =>
+      submitRating(current.id, rating),
+    );
     if (!result.ok) {
       setError(result.error);
       setPending(false);

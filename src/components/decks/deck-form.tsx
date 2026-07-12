@@ -10,6 +10,7 @@ import { GuardedLink } from "@/components/app/guarded-link";
 import { markFormClean } from "@/components/app/dirty-form-store";
 import { getPreviousAppPath } from "@/components/app/navigation-history-store";
 import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
+import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
 import { Button } from "@/components/ui/button";
 import { FormActions, FormSurface } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,7 @@ export function DeckForm({ mode, action, deck }: DeckFormProps) {
     setSubmitError(null);
     startTransition(async () => {
       try {
-        await action(formData);
+        await runWithPendingMutation(() => action(formData));
         if (isEditing) {
           markFormClean();
           setSuccess(true);
