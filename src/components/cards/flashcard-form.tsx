@@ -9,6 +9,7 @@ import { GuardedLink } from "@/components/app/guarded-link";
 import { markFormClean } from "@/components/app/dirty-form-store";
 import { getPreviousAppPath } from "@/components/app/navigation-history-store";
 import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
+import { PrivateCardImage } from "@/components/cards/private-card-image";
 import { Button } from "@/components/ui/button";
 import { FormActions, FormSurface } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
@@ -314,14 +315,24 @@ function SideEditor({
       />
       {value.imageUrl && !value.removeImage ? (
         <div className="relative overflow-hidden rounded-md border border-dashed border-border">
-          <Image
-            src={value.imageUrl}
-            alt={`${label} preview`}
-            width={320}
-            height={240}
-            unoptimized
-            className="h-40 w-full object-contain"
-          />
+          {value.imageUrl.startsWith("blob:") ? (
+            <Image
+              src={value.imageUrl}
+              alt={`${label} preview`}
+              width={320}
+              height={240}
+              unoptimized
+              className="h-40 w-full object-contain"
+            />
+          ) : (
+            <PrivateCardImage
+              src={value.imageUrl}
+              alt={`${label} preview`}
+              width={320}
+              height={240}
+              className="h-40 max-h-40 w-full object-contain"
+            />
+          )}
           <Button
             type="button"
             size="icon"

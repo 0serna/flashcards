@@ -4,6 +4,9 @@ export const FLASHCARD_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 export const FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS = 60 * 60;
 
+/** Private browser cache lifetime for versioned image responses. */
+export const FLASHCARD_IMAGE_PRIVATE_CACHE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+
 export const FLASHCARD_IMAGE_ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",

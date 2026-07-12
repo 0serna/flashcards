@@ -6,6 +6,7 @@ import { AppScreen } from "@/components/app-screen";
 import { StudySession } from "@/components/study/study-session";
 import type { StudyCardPayload } from "@/components/study/study-session";
 import { getDb } from "@/lib/db/client";
+import { cardImageUrl } from "@/lib/cards/service";
 import { listActiveStudyCards, listDueReviewCards } from "@/lib/study/service";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthenticatedUser } from "@/lib/decks/service";
@@ -62,8 +63,16 @@ export default async function StudyPage({
   const cards: StudyCardPayload[] = result.cards.map((card) => ({
     id: card.id,
     deckId: card.deckId,
-    front: { text: card.front.text, imageUrl: card.front.imageUrl },
-    back: { text: card.back.text, imageUrl: card.back.imageUrl },
+    front: {
+      text: card.front.text,
+      imageUrl: cardImageUrl(card, "front", card.front.imageVersion),
+      imageVersion: card.front.imageVersion,
+    },
+    back: {
+      text: card.back.text,
+      imageUrl: cardImageUrl(card, "back", card.back.imageVersion),
+      imageVersion: card.back.imageVersion,
+    },
   }));
 
   const boundSubmit = submitRatingAction.bind(null, deck.id);

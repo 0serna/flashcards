@@ -1,22 +1,31 @@
 "use client";
 
 import { RotateCcw } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { ViewTransition } from "react";
 
+import { PrivateCardImage } from "@/components/cards/private-card-image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { preloadUpcomingImages } from "./preload-study-images";
 import styles from "./study-session.module.css";
 
 export type StudyCardPayload = {
   id: string;
   deckId: string;
-  front: { text: string | null; imageUrl: string | null };
-  back: { text: string | null; imageUrl: string | null };
+  front: {
+    text: string | null;
+    imageUrl: string | null;
+    imageVersion: string | null;
+  };
+  back: {
+    text: string | null;
+    imageUrl: string | null;
+    imageVersion: string | null;
+  };
 };
 
 export type StudyRating = "remembered" | "partial" | "forgotten";
@@ -69,6 +78,10 @@ export function StudySession({
   const [endedEarly, setEndedEarly] = useState(false);
 
   const router = useRouter();
+
+  useEffect(() => {
+    preloadUpcomingImages(orderedCards, index);
+  }, [orderedCards, index]);
 
   function handleEndSession() {
     if (studied === 0) {
@@ -300,8 +313,6 @@ function CardFace({
   text: string | null;
   imageUrl: string | null;
 }) {
-  const [imageSize, setImageSize] = useState({ width: 720, height: 480 });
-
   return (
     <div className="flex w-full flex-col items-center gap-5 text-center">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
@@ -316,22 +327,11 @@ function CardFace({
         </p>
       ) : null}
       {imageUrl ? (
-        <Image
+        <PrivateCardImage
           src={imageUrl}
           alt={`${label} image`}
-          width={imageSize.width}
-          height={imageSize.height}
-          unoptimized
-          onLoad={(event) => {
-            const image = event.currentTarget;
-            if (image.naturalWidth > 0 && image.naturalHeight > 0) {
-              setImageSize({
-                width: image.naturalWidth,
-                height: image.naturalHeight,
-              });
-            }
-          }}
-          className="h-auto max-h-52 w-auto max-w-full rounded-lg border border-border object-contain sm:max-h-64"
+          width={720}
+          height={480}
         />
       ) : null}
       {!text && !imageUrl ? (

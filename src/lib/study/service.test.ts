@@ -228,6 +228,45 @@ describe("listDueReviewCards", () => {
     );
     expect(result).toEqual({ found: true, cards: [] });
   });
+
+  it("projects image versions without creating signed Storage URLs", async () => {
+    const version = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    const now = new Date("2024-01-10T00:00:00.000Z");
+    const { db } = makeDb({
+      deck,
+      cards: [
+        {
+          id: "c1",
+          deckId: "d1",
+          frontText: null,
+          frontImagePath: `d1/c1/front/${version}-photo.png`,
+          backText: "answer",
+          backImagePath: null,
+          createdAt: now,
+          updatedAt: now,
+          archivedAt: null,
+          dueAt: now,
+          easeFactor: DEFAULT_EASE_FACTOR,
+          reviewCount: 0,
+          intervalMinutes: 0,
+        },
+      ],
+    });
+
+    const result = await listDueReviewCards(
+      db as never,
+      createMockSupabase(),
+      "u1",
+      "d1",
+      now,
+    );
+
+    expect(supabaseState.signedUrls).toEqual([]);
+    expect(result).toMatchObject({
+      found: true,
+      cards: [{ front: { imageUrl: null, imageVersion: version } }],
+    });
+  });
 });
 
 describe("listActiveStudyCards", () => {
@@ -240,6 +279,35 @@ describe("listActiveStudyCards", () => {
       "d1",
     );
     expect(result).toEqual({ found: false });
+  });
+
+  it("does not create signed Storage URLs for practice cards", async () => {
+    const now = new Date("2024-01-10T00:00:00.000Z");
+    const { db } = makeDb({
+      deck,
+      cards: [
+        {
+          id: "c1",
+          deckId: "d1",
+          frontText: "question",
+          frontImagePath: null,
+          backText: null,
+          backImagePath:
+            "d1/c1/back/f47ac10b-58cc-4372-a567-0e02b2c3d479-photo.webp",
+          createdAt: now,
+          updatedAt: now,
+          archivedAt: null,
+          dueAt: now,
+          easeFactor: DEFAULT_EASE_FACTOR,
+          reviewCount: 0,
+          intervalMinutes: 0,
+        },
+      ],
+    });
+
+    await listActiveStudyCards(db as never, createMockSupabase(), "u1", "d1");
+
+    expect(supabaseState.signedUrls).toEqual([]);
   });
 });
 

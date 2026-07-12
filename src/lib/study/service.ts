@@ -2,7 +2,7 @@ import { and, asc, count, eq, isNull, lte } from "drizzle-orm";
 
 import { cardReviews, cards, decks } from "@/lib/db/schema";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
-import { signCardImages, toCard } from "@/lib/cards/service";
+import { toCard } from "@/lib/cards/service";
 import { scheduleReview } from "./scheduler";
 import type { ReviewRating, ScheduleOutput } from "./scheduler";
 
@@ -58,7 +58,7 @@ function dueReviewCardsFilter(deckId: string, now: Date) {
 
 export async function listDueReviewCards(
   db: DrizzleDb,
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   userId: string,
   deckId: string,
   now: Date = new Date(),
@@ -73,14 +73,14 @@ export async function listDueReviewCards(
     .orderBy(asc(cards.dueAt), asc(cards.id))) as CardRow[];
 
   const result = await Promise.all(
-    rows.map(async (row) => toCard(row, await signCardImages(supabase, row))),
+    rows.map((row) => toCard(row, { front: null, back: null })),
   );
   return { found: true, cards: result };
 }
 
 export async function listActiveStudyCards(
   db: DrizzleDb,
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   userId: string,
   deckId: string,
 ): Promise<ListStudyCardsResult> {
@@ -94,7 +94,7 @@ export async function listActiveStudyCards(
     .orderBy(asc(cards.createdAt), asc(cards.id))) as CardRow[];
 
   const result = await Promise.all(
-    rows.map(async (row) => toCard(row, await signCardImages(supabase, row))),
+    rows.map((row) => toCard(row, { front: null, back: null })),
   );
   return { found: true, cards: result };
 }

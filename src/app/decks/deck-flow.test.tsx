@@ -32,13 +32,17 @@ vi.mock("@/lib/decks/service", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/cards/service", () => ({
-  listActiveCards: mocks.listActiveCards,
-  listArchivedCards: mocks.listArchivedCards,
-  countActiveCards: mocks.countActiveCards,
-  getActiveCard: mocks.getActiveCard,
-  hasArchivedCards: mocks.hasArchivedCards,
-}));
+vi.mock("@/lib/cards/service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/cards/service")>();
+  return {
+    ...actual,
+    listActiveCards: mocks.listActiveCards,
+    listArchivedCards: mocks.listArchivedCards,
+    countActiveCards: mocks.countActiveCards,
+    getActiveCard: mocks.getActiveCard,
+    hasArchivedCards: mocks.hasArchivedCards,
+  };
+});
 
 vi.mock("@/lib/study/service", () => ({
   countDueReviewCards: mocks.countDueReviewCards,

@@ -8,7 +8,7 @@ import {
   FLASHCARD_IMAGE_BUCKET,
   FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS,
 } from "./storage";
-import type { CardImageMetadata } from "./schema";
+import { extractImageVersion, type CardImageMetadata } from "./schema";
 
 export type CardImage = CardImageMetadata & { bytes: Blob };
 
@@ -25,6 +25,7 @@ export type CardSideContent = {
   text: string | null;
   imagePath: string | null;
   imageUrl: string | null;
+  imageVersion: string | null;
 };
 
 export type Card = {
@@ -60,10 +61,12 @@ function toSideContent(
   urls: { front: string | null; back: string | null },
   side: "front" | "back",
 ): CardSideContent {
+  const imageVersion = extractImageVersion(imagePath);
   return {
     text,
     imagePath,
     imageUrl: imagePath ? urls[side] : null,
+    imageVersion,
   };
 }
 
@@ -82,6 +85,21 @@ export async function toCard(
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+/**
+ * Build a same-origin, versioned URL for a stored card image side. The
+ * URL identifies the deck, card, side, and the immutable image version
+ * (the UUID embedded in the storage path). Returns `null` when the side
+ * has no image.
+ */
+export function cardImageUrl(
+  card: { id: string; deckId: string },
+  side: "front" | "back",
+  imageVersion: string | null,
+): string | null {
+  if (!imageVersion) return null;
+  return `/api/decks/${card.deckId}/cards/${card.id}/image/${side}/v/${imageVersion}`;
 }
 
 async function getOwnedActiveDeckRow(
@@ -193,6 +211,47 @@ export async function getActiveCard(
   const deck = await getOwnedActiveDeckRow(db, userId, deckId);
   if (!deck) return null;
   return toCard(row, await signCardImages(supabase, row, imageTransform));
+}
+
+export type OwnedCardImage = {
+  /** Storage object path used to fetch the blob. */
+  path: string;
+};
+
+/**
+ * Resolve a stored card image for a single side, validating that the
+ * caller's active deck owns the card and that the supplied immutable
+ * version still matches the current side image. The function does not
+ * stream bytes; callers fetch the object from Storage separately.
+ *
+ * `null` is returned for unauthenticated requests, unowned or archived
+ * decks, missing or archived cards, sides without an image, or stale
+ * version mismatches.
+ */
+export async function resolveOwnedCardImage(
+  db: DrizzleDb,
+  userId: string,
+  deckId: string,
+  cardId: string,
+  side: "front" | "back",
+  version: string,
+): Promise<OwnedCardImage | null> {
+  const deck = await getOwnedActiveDeckRow(db, userId, deckId);
+  if (!deck) return null;
+
+  const rows = await db
+    .select()
+    .from(cards)
+    .where(and(eq(cards.id, cardId), eq(cards.deckId, deckId)))
+    .limit(1);
+  const row = rows[0];
+  if (!row) return null;
+
+  const currentPath = side === "front" ? row.frontImagePath : row.backImagePath;
+  if (!currentPath) return null;
+  if (extractImageVersion(currentPath) !== version) return null;
+
+  return { path: currentPath };
 }
 
 export type CreateCardInput = {

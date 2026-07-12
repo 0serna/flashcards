@@ -6,7 +6,7 @@ import { AppScreen } from "@/components/app-screen";
 import { FlashcardForm } from "@/components/cards/flashcard-form";
 import { getDb } from "@/lib/db/client";
 import { cardDeckIdSchema, cardIdSchema } from "@/lib/cards/schema";
-import { getActiveCard } from "@/lib/cards/service";
+import { cardImageUrl, getActiveCard } from "@/lib/cards/service";
 import { getAuthenticatedUser } from "@/lib/decks/service";
 import { createClient } from "@/lib/supabase/server";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
@@ -57,9 +57,12 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
         initial={{
           front: {
             text: card.front.text ?? "",
-            imageUrl: card.front.imageUrl,
+            imageUrl: cardImageUrl(card, "front", card.front.imageVersion),
           },
-          back: { text: card.back.text ?? "", imageUrl: card.back.imageUrl },
+          back: {
+            text: card.back.text ?? "",
+            imageUrl: cardImageUrl(card, "back", card.back.imageVersion),
+          },
         }}
       />
     </AppScreen>

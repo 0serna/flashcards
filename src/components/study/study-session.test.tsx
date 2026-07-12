@@ -4,10 +4,20 @@ import { useRouter } from "next/navigation";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StudySession, type StudyCardPayload } from "./study-session";
+import { preloadUpcomingImages } from "./preload-study-images";
 
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
+
+vi.mock("./preload-study-images", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("./preload-study-images")>();
+  return {
+    ...actual,
+    preloadUpcomingImages: vi.fn(),
+  };
+});
 
 const cards: StudyCardPayload[] = [
   {
@@ -225,5 +235,43 @@ describe("StudySession", () => {
     expect(
       screen.queryByText(/session (ended|complete)/i),
     ).not.toBeInTheDocument();
+  });
+
+  it("preloads the next cards' images when the current card advances", async () => {
+    const user = userEvent.setup();
+    vi.mocked(preloadUpcomingImages).mockClear();
+
+    const imageCards: StudyCardPayload[] = [
+      {
+        id: "card-1",
+        deckId: "deck-1",
+        front: { text: null, imageUrl: "/img/c1-front", imageVersion: "v1" },
+        back: { text: null, imageUrl: "/img/c1-back", imageVersion: "v1" },
+      },
+      {
+        id: "card-2",
+        deckId: "deck-1",
+        front: { text: null, imageUrl: "/img/c2-front", imageVersion: "v2" },
+        back: { text: null, imageUrl: "/img/c2-back", imageVersion: "v2" },
+      },
+    ];
+
+    render(
+      <StudySession
+        mode="review"
+        deckId="deck-1"
+        deckName="Spanish Basics"
+        initialCards={imageCards}
+        submitRating={vi.fn().mockResolvedValue({ ok: true })}
+      />,
+    );
+
+    expect(preloadUpcomingImages).toHaveBeenCalledWith(imageCards, 0);
+    expect(screen.getAllByText(/loading image/i).length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole("button", { name: /show back/i }));
+    await user.click(screen.getByRole("button", { name: /i knew it/i }));
+
+    expect(preloadUpcomingImages).toHaveBeenLastCalledWith(imageCards, 1);
   });
 });

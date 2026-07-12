@@ -41,6 +41,21 @@ export const cardImagePathSchema = z
   .string()
   .regex(/^[A-Za-z0-9._/-]+$/, "Image path is invalid");
 
+/**
+ * Extract the immutable version segment from a stored card image path.
+ * The path has shape `<deckId>/<cardId>/<side>/<uuid>-<name>`; the UUID
+ * prefix is the unique version identifier used by the public image
+ * route. Returns `null` when no UUID can be parsed.
+ */
+const UUID_AT_START_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+export function extractImageVersion(path: string | null): string | null {
+  if (!path) return null;
+  const last = path.split("/").pop() ?? "";
+  const match = last.match(UUID_AT_START_PATTERN);
+  return match ? match[0] : null;
+}
 const sideContentSchema = z
   .object({
     text: cardOptionalTextSchema,

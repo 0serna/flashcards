@@ -12,6 +12,14 @@ _Avoid_: Magic Link, email code sign-in, password login
 Ending the current authenticated session for the user in this browser/device without changing their Google account or study material.
 _Avoid_: account deletion, Google account logout, deck reset
 
+**Upward navigation**:
+Navigation from the current authenticated screen to its immediate parent in the app hierarchy, regardless of browser history; it stops at Home.
+_Avoid_: browser back, chronological back, history navigation
+
+**Home**:
+The root authenticated screen and terminal destination of upward navigation.
+_Avoid_: previous page, landing page
+
 **Deck**:
 A user-owned collection of cards grouped for study.
 _Avoid_: folder, set, stack
@@ -39,3 +47,23 @@ _Avoid_: streak system, quiz score, game progression
 **Study session**:
 An ephemeral run where a user answers cards from one deck; each answer is saved independently as review history.
 _Avoid_: saved session, test attempt, exam
+
+**Private image cache**:
+A best-effort browser-profile cache of private card images that speeds up repeat study and may remain available for 30 days after sign-out.
+_Avoid_: shared media library, account-wide cache
+
+**Image loading state**:
+A temporary neutral presentation with subtle motion and accessible text for a private card image in a study session or card editing while its content is still loading; motion is removed when the user prefers reduced motion.
+_Avoid_: card loading state, session loading state
+
+**Image unavailable state**:
+A recoverable presentation for a private card image that cannot load, which explains the failure and lets the user retry.
+_Avoid_: missing card content, silently hidden image
+
+**Study image preloading**:
+The advance loading of the front and back images for the next 10 cards in the current study session, limited to 20 images, that yields to browser data-saving and slow-network preferences.
+_Avoid_: unbounded deck download, full offline sync
+
+**Private image access**:
+Authorization to load an image belonging to an active or archived card only when its deck is active and owned by the current user.
+_Avoid_: public image access, archived-deck access
