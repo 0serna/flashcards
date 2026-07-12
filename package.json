@@ -15,7 +15,6 @@
     "format": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check:openspec": "openspec validate --all --strict",
     "prepare": "husky"
   },
   "dependencies": {

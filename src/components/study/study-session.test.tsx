@@ -122,4 +122,52 @@ describe("StudySession", () => {
     expect(screen.getByText("Almost").nextSibling).toHaveTextContent("0");
     expect(screen.getByText("I knew it").nextSibling).toHaveTextContent("1");
   });
+
+  it("stagger-paints the rating buttons when the answer is revealed", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <StudySession
+        mode="review"
+        deckId="deck-1"
+        deckName="Spanish Basics"
+        initialCards={cards}
+        submitRating={vi.fn().mockResolvedValue({ ok: true })}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /show answer/i }));
+
+    const forgotten = screen.getByRole("button", { name: /i forgot/i });
+    const partial = screen.getByRole("button", { name: /almost/i });
+    const remembered = screen.getByRole("button", { name: /i knew it/i });
+
+    expect(forgotten.style.getPropertyValue("--rating-i")).toBe("0");
+    expect(partial.style.getPropertyValue("--rating-i")).toBe("1");
+    expect(remembered.style.getPropertyValue("--rating-i")).toBe("2");
+  });
+
+  it("remounts the card article when advancing to the next card", async () => {
+    const user = userEvent.setup();
+    const submitRating = vi.fn().mockResolvedValue({ ok: true });
+
+    render(
+      <StudySession
+        mode="review"
+        deckId="deck-1"
+        deckName="Spanish Basics"
+        initialCards={cards}
+        submitRating={submitRating}
+      />,
+    );
+
+    const initialCard = screen.getByRole("button", { name: /show answer/i });
+    expect(initialCard).toBeInTheDocument();
+
+    await user.click(initialCard);
+    await user.click(screen.getByRole("button", { name: /i knew it/i }));
+
+    const nextCard = screen.getByRole("button", { name: /show answer/i });
+    expect(nextCard).not.toBe(initialCard);
+  });
 });

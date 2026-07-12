@@ -126,4 +126,45 @@
   html::-webkit-scrollbar-thumb {
     transition: none;
   }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* Soft crossfade for the study session between routes.
+ * Keeps the page swap calm and aligned with the "Quiet Study Desk"
+ * brand; positional movement is reserved for in-card transitions
+ * (flip, swap) inside the session itself. */
+::view-transition-old(study-card),
+::view-transition-old(study-summary),
+::view-transition-old(study-empty) {
+  animation: 160ms ease-out both fadeOut;
+}
+
+::view-transition-new(study-card),
+::view-transition-new(study-summary),
+::view-transition-new(study-empty) {
+  animation: 220ms ease-out 80ms both fadeIn;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
