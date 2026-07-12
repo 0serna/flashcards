@@ -1,0 +1,102 @@
+.cardStage {
+  perspective: 60rem;
+}
+
+.flashcard {
+  width: 100%;
+  cursor: pointer;
+  touch-action: manipulation;
+  border-radius: 1rem;
+  color: inherit;
+  text-align: left;
+  outline: none;
+  transition: transform 150ms ease-out;
+}
+
+@media (hover: hover) {
+  .flashcard:hover .cardFace {
+    box-shadow: 0 4px 8px oklch(0 0 0 / 0.08);
+  }
+}
+
+.flashcard:active {
+  transform: scale(0.99);
+}
+
+.flashcard:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 4px;
+}
+
+.cardInner {
+  display: grid;
+  transform: rotateY(0deg);
+  transform-origin: center;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 440ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.cardInner[data-revealed="true"] {
+  transform: rotateY(180deg);
+}
+
+.cardFace {
+  grid-area: 1 / 1;
+  display: flex;
+  min-height: 20rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  overflow: hidden;
+  padding: 3rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--background);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-origin: center;
+  transition:
+    box-shadow 150ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.cardBack {
+  transform: rotateY(180deg);
+  background: var(--secondary);
+}
+
+.flipHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.flipHint svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (min-width: 640px) {
+  .cardFace {
+    min-height: 22rem;
+    padding-inline: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flashcard,
+  .cardInner,
+  .cardFace {
+    transition-duration: 1ms;
+  }
+
+  .cardInner {
+    will-change: auto;
+  }
+}

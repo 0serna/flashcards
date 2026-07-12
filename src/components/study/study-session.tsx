@@ -3,9 +3,11 @@
 import { RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+
+import styles from "./study-session.module.css";
 
 export type StudyCardPayload = {
   id: string;
@@ -139,10 +141,16 @@ export function StudySession({
     setPending(false);
   }
 
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    setRevealed((value) => !value);
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+        <p className="text-sm font-medium text-muted-foreground">
           {mode === "review" ? "Review" : "Practice"} · {index + 1}/
           {orderedCards.length}
         </p>
@@ -155,21 +163,48 @@ export function StudySession({
         </Link>
       </div>
 
-      <article className="space-y-4 rounded-2xl border border-border bg-background p-6">
-        <CardFace
-          label="Front"
-          text={current.front.text}
-          imageUrl={current.front.imageUrl}
-        />
-        {revealed ? (
-          <div className="border-t border-border pt-4">
-            <CardFace
-              label="Back"
-              text={current.back.text}
-              imageUrl={current.back.imageUrl}
-            />
+      <article className={styles.cardStage} aria-label="Study card">
+        <div
+          className={styles.flashcard}
+          role="button"
+          tabIndex={0}
+          aria-pressed={revealed}
+          aria-label={revealed ? "Show question" : "Show answer"}
+          onClick={() => setRevealed((value) => !value)}
+          onKeyDown={handleCardKeyDown}
+        >
+          <div
+            className={styles.cardInner}
+            data-revealed={revealed}
+            aria-live="polite"
+          >
+            <div className={styles.cardFace} aria-hidden={revealed}>
+              <CardFace
+                label="Question"
+                text={current.front.text}
+                imageUrl={current.front.imageUrl}
+              />
+              <span className={styles.flipHint}>
+                <RotateCcw aria-hidden="true" />
+                Tap or click to reveal answer
+              </span>
+            </div>
+            <div
+              className={`${styles.cardFace} ${styles.cardBack}`}
+              aria-hidden={!revealed}
+            >
+              <CardFace
+                label="Answer"
+                text={current.back.text}
+                imageUrl={current.back.imageUrl}
+              />
+              <span className={styles.flipHint}>
+                <RotateCcw aria-hidden="true" />
+                Tap or click to see question
+              </span>
+            </div>
           </div>
-        ) : null}
+        </div>
       </article>
 
       {error ? (
@@ -179,7 +214,7 @@ export function StudySession({
       ) : null}
 
       {revealed ? (
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {(["forgotten", "partial", "remembered"] as const).map((rating) => (
             <Button
               key={rating}
@@ -192,16 +227,7 @@ export function StudySession({
             </Button>
           ))}
         </div>
-      ) : (
-        <Button
-          type="button"
-          onClick={() => setRevealed(true)}
-          className="w-full"
-        >
-          <RotateCcw aria-hidden="true" />
-          Show answer
-        </Button>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -218,12 +244,10 @@ function CardFace({
   const [imageSize, setImageSize] = useState({ width: 720, height: 480 });
 
   return (
-    <div className="space-y-3">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
+    <div className="flex w-full flex-col items-center gap-5 text-center">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
       {text ? (
-        <p className="whitespace-pre-wrap break-words text-lg leading-7 text-balance">
+        <p className="max-w-prose whitespace-pre-wrap break-words text-xl leading-8 text-balance sm:text-2xl">
           {text}
         </p>
       ) : null}
@@ -243,7 +267,7 @@ function CardFace({
               });
             }
           }}
-          className="h-auto max-h-72 w-auto max-w-full rounded-xl border border-border object-contain"
+          className="h-auto max-h-72 w-auto max-w-full rounded-lg border border-border object-contain"
         />
       ) : null}
       {!text && !imageUrl ? (
