@@ -12,9 +12,9 @@
     "db:check": "drizzle-kit check",
     "build": "next build",
     "test": "vitest run",
-    "check:format": "prettier --check .",
-    "check:lint": "eslint .",
-    "check:type": "tsc --noEmit",
+    "format": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "check:openspec": "openspec validate --all --strict",
     "prepare": "husky"
   },
@@ -39,7 +39,6 @@
     "*.{js,jsx,ts,tsx,mjs,cjs}": "eslint --fix"
   },
   "devDependencies": {
-    "@fission-ai/openspec": "^1.6.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

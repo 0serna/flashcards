@@ -26,15 +26,14 @@
 
 - `npm run dev`: start the Next.js development server.
 - `npm run build`: build the production app.
-- `npm run check:format`: check repository formatting.
-- `npm run check:lint`: run the linter.
-- `npm run check:type`: run the TypeScript type checker.
-- `npm run check:openspec`: validate all OpenSpec changes strictly.
+- `npm run format`: check repository formatting.
+- `npm run lint`: run the linter.
+- `npm run typecheck`: run the TypeScript type checker.
 - `npm run db:generate`: generate Drizzle migrations.
 - `npm run db:migrate`: run Drizzle migrations.
+- `npm run db:check`: validate Drizzle schema consistency.
 - `npm run supabase:start`: start local Supabase services.
 - `npm run supabase:stop`: stop local Supabase services.
-- `npm run db:check`: validate Drizzle schema consistency.
 - `npm run test`: run the Vitest test suite.
 - `npm run deploy`: deploy to production.
 
