@@ -16,7 +16,6 @@
     "check:lint": "eslint .",
     "check:type": "tsc --noEmit",
     "check:openspec": "openspec validate --all --strict",
-    "check": "npm run check:format && npm run check:lint && npm run check:type && npm run check:openspec && npm run test && npm run build && npm run db:check",
     "prepare": "husky"
   },
   "dependencies": {
