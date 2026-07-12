@@ -1,7 +1,7 @@
 import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
-import { FlashcardForm } from "@/components/cards/flashcard-form";
+import { CardForm } from "@/components/cards/card-form";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
 
 import { createCardAction } from "../../../cards/actions";
@@ -28,7 +28,7 @@ export default async function AddFirstCardPage({
         ]}
       />
 
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={saveCardAction}
         alternativeAction={saveAnotherAction}

@@ -115,7 +115,7 @@ describe("StudySession", () => {
     ).toBeInTheDocument();
   });
 
-  it("summarizes studied flashcards by rating", async () => {
+  it("summarizes studied cards by rating", async () => {
     const user = userEvent.setup();
     const submitRating = vi.fn().mockResolvedValue({ ok: true });
 

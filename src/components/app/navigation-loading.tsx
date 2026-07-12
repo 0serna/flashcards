@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const NAVIGATION_DELAY_MS = 150;
-const NAVIGATION_START_EVENT = "flashcards:navigation-start";
+const NAVIGATION_START_EVENT = "cards:navigation-start";
 
 /**
  * Starts the shared authenticated navigation feedback after the configured

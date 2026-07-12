@@ -1,6 +1,6 @@
 ---
 name: Flashcards
-description: Mobile-first flashcards PWA for low-friction spaced-repetition study.
+description: Mobile-first study PWA for low-friction spaced-repetition review.
 colors:
   background: "oklch(1 0 0)"
   foreground: "oklch(0.145 0 0)"

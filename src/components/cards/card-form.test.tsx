@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
 
 import { __resetDirtyFormStoreForTests } from "@/components/app/dirty-form-store";
 import { __resetNavigationHistoryForTests } from "@/components/app/navigation-history-store";
-import { FlashcardForm } from "./flashcard-form";
+import { CardForm } from "./card-form";
 
 afterEach(() => {
   cleanup();
@@ -30,14 +30,14 @@ beforeEach(() => {
   __resetNavigationHistoryForTests();
 });
 
-describe("FlashcardForm", () => {
+describe("CardForm", () => {
   it("shows which save action is in progress when saving and adding another", async () => {
     const user = userEvent.setup();
     const action = vi.fn();
     const alternativeAction = vi.fn();
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={action}
         alternativeAction={alternativeAction}
@@ -62,7 +62,7 @@ describe("FlashcardForm", () => {
     const action = vi.fn().mockResolvedValue(undefined);
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="edit"
         action={action}
         cancelHref="/decks/deck-1"
@@ -87,7 +87,7 @@ describe("FlashcardForm", () => {
     const action = vi.fn().mockRejectedValue(new Error("network failure"));
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="edit"
         action={action}
         cancelHref="/decks/deck-1"
@@ -113,7 +113,7 @@ describe("FlashcardForm", () => {
     const action = vi.fn().mockRejectedValue(new Error("network failure"));
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={action}
         cancelHref="/decks/deck-1"
@@ -136,7 +136,7 @@ describe("FlashcardForm", () => {
     const alternativeAction = vi.fn().mockRejectedValue(new Error("fail"));
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={action}
         alternativeAction={alternativeAction}
@@ -167,7 +167,7 @@ describe("FlashcardForm", () => {
     const action = vi.fn().mockResolvedValue(undefined);
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="edit"
         action={action}
         cancelHref="/decks/deck-1"
@@ -198,7 +198,7 @@ describe("FlashcardForm", () => {
     const user = userEvent.setup();
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={vi.fn()}
         cancelHref="/decks/deck-1"
@@ -229,7 +229,7 @@ describe("FlashcardForm", () => {
     const archiveAction = vi.fn().mockResolvedValue(undefined);
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="edit"
         action={vi.fn()}
         archiveAction={archiveAction}
@@ -254,7 +254,7 @@ describe("FlashcardForm", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={vi.fn()}
         cancelHref="/decks/deck-1"
@@ -271,7 +271,7 @@ describe("FlashcardForm", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
 
     render(
-      <FlashcardForm
+      <CardForm
         mode="create"
         action={vi.fn()}
         cancelHref="/decks/deck-1"

@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { FLASHCARD_IMAGE_MAX_BYTES } from "./storage";
+import { CARD_IMAGE_MAX_BYTES } from "./storage";
 import {
-  FLASHCARD_IMAGE_MAX_EDGE_PIXELS,
-  FLASHCARD_IMAGE_OPTIMIZED_MIME_TYPE,
-  optimizeFlashcardImageFile,
+  CARD_IMAGE_MAX_EDGE_PIXELS,
+  CARD_IMAGE_OPTIMIZED_MIME_TYPE,
+  optimizeCardImageFile,
 } from "./image-optimization";
 
 afterEach(() => {
@@ -12,7 +12,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("optimizeFlashcardImageFile", () => {
+describe("optimizeCardImageFile", () => {
   it("returns a smaller WebP resized to the maximum edge", async () => {
     vi.stubGlobal(
       "createImageBitmap",
@@ -35,14 +35,14 @@ describe("optimizeFlashcardImageFile", () => {
       lastModified: 123,
     });
 
-    const optimized = await optimizeFlashcardImageFile(original);
+    const optimized = await optimizeCardImageFile(original);
 
     expect(optimized).not.toBe(original);
     expect(optimized.name).toBe("front.webp");
-    expect(optimized.type).toBe(FLASHCARD_IMAGE_OPTIMIZED_MIME_TYPE);
+    expect(optimized.type).toBe(CARD_IMAGE_OPTIMIZED_MIME_TYPE);
     expect(optimized.size).toBe(100);
     expect(optimized.lastModified).toBe(123);
-    expect(canvas.width).toBe(FLASHCARD_IMAGE_MAX_EDGE_PIXELS);
+    expect(canvas.width).toBe(CARD_IMAGE_MAX_EDGE_PIXELS);
     expect(canvas.height).toBe(600);
   });
 
@@ -52,17 +52,17 @@ describe("optimizeFlashcardImageFile", () => {
       type: "image/png",
     });
 
-    await expect(optimizeFlashcardImageFile(original)).resolves.toBe(original);
+    await expect(optimizeCardImageFile(original)).resolves.toBe(original);
   });
 
   it("rejects originals larger than 5 MB", async () => {
     const original = new File(
-      [new Uint8Array(FLASHCARD_IMAGE_MAX_BYTES + 1)],
+      [new Uint8Array(CARD_IMAGE_MAX_BYTES + 1)],
       "front.png",
       { type: "image/png" },
     );
 
-    await expect(optimizeFlashcardImageFile(original)).rejects.toThrow(
+    await expect(optimizeCardImageFile(original)).rejects.toThrow(
       "Image must be 5 MB or smaller",
     );
   });

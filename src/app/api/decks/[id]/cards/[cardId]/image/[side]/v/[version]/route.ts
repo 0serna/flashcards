@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/db/client";
 import { httpErrors } from "@/lib/api/http";
 import {
-  FLASHCARD_IMAGE_BUCKET,
-  FLASHCARD_IMAGE_PRIVATE_CACHE_MAX_AGE_SECONDS,
+  CARD_IMAGE_BUCKET,
+  CARD_IMAGE_PRIVATE_CACHE_MAX_AGE_SECONDS,
 } from "@/lib/cards/storage";
 import { getAuthenticatedUser } from "@/lib/decks/service";
 import { resolveOwnedCardImage } from "@/lib/cards/service";
@@ -46,7 +46,7 @@ export async function GET(
   if (!owned) return httpErrors.notFound();
 
   const { data, error } = await supabase.storage
-    .from(FLASHCARD_IMAGE_BUCKET)
+    .from(CARD_IMAGE_BUCKET)
     .download(owned.path);
   if (error || !data) return httpErrors.notFound();
 
@@ -54,7 +54,7 @@ export async function GET(
     status: 200,
     headers: {
       "Content-Type": data.type || "application/octet-stream",
-      "Cache-Control": `private, max-age=${FLASHCARD_IMAGE_PRIVATE_CACHE_MAX_AGE_SECONDS}`,
+      "Cache-Control": `private, max-age=${CARD_IMAGE_PRIVATE_CACHE_MAX_AGE_SECONDS}`,
     },
   });
 }

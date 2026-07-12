@@ -1,4 +1,4 @@
-# flashcard-database Specification
+# card-database Specification
 
 ## Purpose
 
@@ -8,7 +8,7 @@ TBD - created by archiving change add-database-schema. Update Purpose after arch
 
 ### Requirement: User-owned deck storage
 
-The system SHALL persist flashcard decks in Supabase Postgres with ownership tied to Supabase Auth users.
+The system SHALL persist card decks in Supabase Postgres with ownership tied to Supabase Auth users.
 
 #### Scenario: Deck table supports authenticated ownership
 
@@ -22,7 +22,7 @@ The system SHALL persist flashcard decks in Supabase Postgres with ownership tie
 
 ### Requirement: Card storage with text and image references
 
-The system SHALL persist flashcards inside decks with front and back content that can contain text, an image path, or both.
+The system SHALL persist cards inside decks with front and back content that can contain text, an image path, or both.
 
 #### Scenario: Card table supports front and back content
 
@@ -46,7 +46,7 @@ The system SHALL persist flashcards inside decks with front and back content tha
 
 ### Requirement: Card review history storage
 
-The system SHALL persist immutable review events for flashcards with closed rating values and scheduling snapshots.
+The system SHALL persist immutable review events for cards with closed rating values and scheduling snapshots.
 
 #### Scenario: Review table supports simplified ratings
 

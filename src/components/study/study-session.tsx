@@ -99,7 +99,7 @@ export function StudySession({
             <p className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
               {mode === "review"
                 ? "You're all caught up."
-                : "This deck has no active flashcards."}
+                : "This deck has no active cards."}
             </p>
             <p className="text-sm leading-6 text-muted-foreground text-balance">
               {mode === "review"
@@ -228,7 +228,7 @@ export function StudySession({
           aria-label="Study card"
         >
           <div
-            className={styles.flashcard}
+            className={styles.card}
             role="button"
             tabIndex={0}
             aria-pressed={revealed}

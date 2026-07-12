@@ -1,20 +1,17 @@
-import {
-  FLASHCARD_IMAGE_ALLOWED_MIME_TYPES,
-  FLASHCARD_IMAGE_MAX_BYTES,
-} from "./storage";
+import { CARD_IMAGE_ALLOWED_MIME_TYPES, CARD_IMAGE_MAX_BYTES } from "./storage";
 
-export const FLASHCARD_IMAGE_OPTIMIZED_MIME_TYPE = "image/webp";
-export const FLASHCARD_IMAGE_MAX_EDGE_PIXELS = 1200;
-const FLASHCARD_IMAGE_OPTIMIZED_QUALITY = 0.8;
+export const CARD_IMAGE_OPTIMIZED_MIME_TYPE = "image/webp";
+export const CARD_IMAGE_MAX_EDGE_PIXELS = 1200;
+const CARD_IMAGE_OPTIMIZED_QUALITY = 0.8;
 
-export class FlashcardImageOptimizationError extends Error {
+export class CardImageOptimizationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "FlashcardImageOptimizationError";
+    this.name = "CardImageOptimizationError";
   }
 }
 
-export async function optimizeFlashcardImageFile(file: File): Promise<File> {
+export async function optimizeCardImageFile(file: File): Promise<File> {
   validateOriginalImage(file);
 
   if (typeof createImageBitmap !== "function") return file;
@@ -24,7 +21,7 @@ export async function optimizeFlashcardImageFile(file: File): Promise<File> {
     try {
       const scale = Math.min(
         1,
-        FLASHCARD_IMAGE_MAX_EDGE_PIXELS / Math.max(bitmap.width, bitmap.height),
+        CARD_IMAGE_MAX_EDGE_PIXELS / Math.max(bitmap.width, bitmap.height),
       );
       const width = Math.max(1, Math.round(bitmap.width * scale));
       const height = Math.max(1, Math.round(bitmap.height * scale));
@@ -39,7 +36,7 @@ export async function optimizeFlashcardImageFile(file: File): Promise<File> {
       if (!blob || blob.size === 0 || blob.size >= file.size) return file;
 
       return new File([blob], webpFileName(file.name), {
-        type: FLASHCARD_IMAGE_OPTIMIZED_MIME_TYPE,
+        type: CARD_IMAGE_OPTIMIZED_MIME_TYPE,
         lastModified: file.lastModified,
       });
     } finally {
@@ -51,17 +48,13 @@ export async function optimizeFlashcardImageFile(file: File): Promise<File> {
 }
 
 function validateOriginalImage(file: File) {
-  if (file.size > FLASHCARD_IMAGE_MAX_BYTES) {
-    throw new FlashcardImageOptimizationError("Image must be 5 MB or smaller");
+  if (file.size > CARD_IMAGE_MAX_BYTES) {
+    throw new CardImageOptimizationError("Image must be 5 MB or smaller");
   }
   if (
-    !(FLASHCARD_IMAGE_ALLOWED_MIME_TYPES as readonly string[]).includes(
-      file.type,
-    )
+    !(CARD_IMAGE_ALLOWED_MIME_TYPES as readonly string[]).includes(file.type)
   ) {
-    throw new FlashcardImageOptimizationError(
-      "Image must be JPEG, PNG, or WebP",
-    );
+    throw new CardImageOptimizationError("Image must be JPEG, PNG, or WebP");
   }
 }
 
@@ -69,8 +62,8 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => {
     canvas.toBlob(
       resolve,
-      FLASHCARD_IMAGE_OPTIMIZED_MIME_TYPE,
-      FLASHCARD_IMAGE_OPTIMIZED_QUALITY,
+      CARD_IMAGE_OPTIMIZED_MIME_TYPE,
+      CARD_IMAGE_OPTIMIZED_QUALITY,
     );
   });
 }

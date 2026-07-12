@@ -15,8 +15,8 @@ import { FormActions, FormSurface } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  FlashcardImageOptimizationError,
-  optimizeFlashcardImageFile,
+  CardImageOptimizationError,
+  optimizeCardImageFile,
 } from "@/lib/cards/image-optimization";
 
 type Side = "front" | "back";
@@ -27,25 +27,25 @@ type SideState = {
   removeImage: boolean;
 };
 
-export type FlashcardFormInitial = {
+export type CardFormInitial = {
   front: { text: string; imageUrl: string | null };
   back: { text: string; imageUrl: string | null };
 };
 
 type FormAction = (formData: FormData) => void | Promise<void>;
 
-type FlashcardFormProps = {
+type CardFormProps = {
   mode: "create" | "edit";
   action: FormAction;
   alternativeAction?: FormAction;
   alternativeLabel?: string;
   archiveAction?: FormAction;
   cancelHref: string;
-  initial?: FlashcardFormInitial;
+  initial?: CardFormInitial;
   submitLabel: string;
 };
 
-export function FlashcardForm({
+export function CardForm({
   mode,
   action,
   alternativeAction,
@@ -54,7 +54,7 @@ export function FlashcardForm({
   cancelHref,
   initial,
   submitLabel,
-}: FlashcardFormProps) {
+}: CardFormProps) {
   const frontId = useId();
   const backId = useId();
   const frontImageId = useId();
@@ -374,9 +374,9 @@ async function optimizeFormDataImages(formData: FormData): Promise<FormData> {
       value.size > 0
     ) {
       try {
-        next.append(name, await optimizeFlashcardImageFile(value));
+        next.append(name, await optimizeCardImageFile(value));
       } catch (error) {
-        if (error instanceof FlashcardImageOptimizationError) {
+        if (error instanceof CardImageOptimizationError) {
           const side = name === "frontImage" ? "front" : "back";
           const label = side === "front" ? "Front" : "Back";
           throw new FormImageError(

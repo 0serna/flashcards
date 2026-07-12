@@ -4,9 +4,9 @@ import { randomUUID } from "node:crypto";
 
 import { cards, decks } from "@/lib/db/schema";
 import {
-  isFlashcardImageMimeType,
-  FLASHCARD_IMAGE_BUCKET,
-  FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS,
+  isCardImageMimeType,
+  CARD_IMAGE_BUCKET,
+  CARD_IMAGE_SIGNED_URL_TTL_SECONDS,
 } from "./storage";
 import { extractImageVersion, type CardImageMetadata } from "./schema";
 
@@ -129,20 +129,20 @@ export async function signCardImages(
   const options = transform ? { transform } : undefined;
   if (row.frontImagePath) {
     const { data } = await supabase.storage
-      .from(FLASHCARD_IMAGE_BUCKET)
+      .from(CARD_IMAGE_BUCKET)
       .createSignedUrl(
         row.frontImagePath,
-        FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS,
+        CARD_IMAGE_SIGNED_URL_TTL_SECONDS,
         options,
       );
     urls.front = data?.signedUrl ?? null;
   }
   if (row.backImagePath) {
     const { data } = await supabase.storage
-      .from(FLASHCARD_IMAGE_BUCKET)
+      .from(CARD_IMAGE_BUCKET)
       .createSignedUrl(
         row.backImagePath,
-        FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS,
+        CARD_IMAGE_SIGNED_URL_TTL_SECONDS,
         options,
       );
     urls.back = data?.signedUrl ?? null;
@@ -532,7 +532,7 @@ async function cleanupUploadedImages(
   paths: string[],
 ): Promise<void> {
   if (paths.length === 0) return;
-  await supabase.storage.from(FLASHCARD_IMAGE_BUCKET).remove(paths);
+  await supabase.storage.from(CARD_IMAGE_BUCKET).remove(paths);
 }
 
 function buildImagePath(
@@ -557,12 +557,12 @@ async function uploadImage(
   side: "front" | "back",
   image: CardImage,
 ): Promise<string> {
-  if (!isFlashcardImageMimeType(image.type)) {
+  if (!isCardImageMimeType(image.type)) {
     throw new Error("Image must be JPEG, PNG, or WebP");
   }
   const path = buildImagePath(deckId, cardId, side, image.name);
   const { error } = await supabase.storage
-    .from(FLASHCARD_IMAGE_BUCKET)
+    .from(CARD_IMAGE_BUCKET)
     .upload(path, image.bytes, {
       contentType: image.type,
       upsert: false,
@@ -577,5 +577,5 @@ export async function deleteImage(
   supabase: SupabaseClient,
   path: string,
 ): Promise<void> {
-  await supabase.storage.from(FLASHCARD_IMAGE_BUCKET).remove([path]);
+  await supabase.storage.from(CARD_IMAGE_BUCKET).remove([path]);
 }

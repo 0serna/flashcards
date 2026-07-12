@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import {
-  FLASHCARD_IMAGE_MAX_BYTES,
-  FLASHCARD_IMAGE_ALLOWED_MIME_TYPES,
-} from "./storage";
+import { CARD_IMAGE_MAX_BYTES, CARD_IMAGE_ALLOWED_MIME_TYPES } from "./storage";
 
 export const cardIdSchema = z.uuid();
 export const cardDeckIdSchema = z.uuid();
@@ -21,7 +18,7 @@ const imageMimeTypeSchema = z
   .string()
   .refine(
     (value) =>
-      (FLASHCARD_IMAGE_ALLOWED_MIME_TYPES as readonly string[]).includes(value),
+      (CARD_IMAGE_ALLOWED_MIME_TYPES as readonly string[]).includes(value),
     "Image must be JPEG, PNG, or WebP",
   );
 
@@ -30,7 +27,7 @@ export const cardImageMetadataSchema = z.object({
     .number()
     .int()
     .nonnegative()
-    .max(FLASHCARD_IMAGE_MAX_BYTES, "Image must be 5 MB or smaller"),
+    .max(CARD_IMAGE_MAX_BYTES, "Image must be 5 MB or smaller"),
   type: imageMimeTypeSchema,
   name: z.string().min(1),
 });

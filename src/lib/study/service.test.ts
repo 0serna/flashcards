@@ -323,7 +323,7 @@ describe("countDueReviewCards", () => {
     expect(result).toBeNull();
   });
 
-  it("counts only active flashcards due at or before now", async () => {
+  it("counts only active cards due at or before now", async () => {
     const now = new Date("2024-01-10T00:00:00.000Z");
     const makeCard = (id: string, dueAt: Date, archivedAt: Date | null) => ({
       id,
@@ -427,7 +427,7 @@ describe("recordCardReview", () => {
     expect(update.dueAt).toBeInstanceOf(Date);
   });
 
-  it("stores exact scheduling snapshots for a reviewed remembered flashcard", async () => {
+  it("stores exact scheduling snapshots for a reviewed remembered card", async () => {
     const previousDueAt = new Date("2024-01-01T00:00:00.000Z");
     const reviewedAt = new Date("2024-01-08T00:00:00.000Z");
     const nextDueAt = new Date("2024-01-09T19:20:00.000Z");

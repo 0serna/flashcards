@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
-import { FlashcardForm } from "@/components/cards/flashcard-form";
+import { CardForm } from "@/components/cards/card-form";
 import { getDb } from "@/lib/db/client";
 import { cardDeckIdSchema, cardIdSchema } from "@/lib/cards/schema";
 import { cardImageUrl, getActiveCard } from "@/lib/cards/service";
@@ -48,7 +48,7 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
         ]}
       />
 
-      <FlashcardForm
+      <CardForm
         mode="edit"
         action={updateAction}
         archiveAction={archiveAction}

@@ -18,7 +18,7 @@ The system SHALL provide a runnable Next.js App Router application initialized w
 - **WHEN** the project lint command is executed
 - **THEN** ESLint SHALL complete successfully
 
-### Requirement: Initial flashcards landing page
+### Requirement: Initial cards landing page
 
 The system SHALL show an authenticated Home page for the Flashcards app with the shared authenticated header, the user's active Decks, and available Deck actions after the user has logged in.
 

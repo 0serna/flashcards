@@ -1,7 +1,4 @@
-import {
-  FLASHCARD_IMAGE_MAX_BYTES,
-  isFlashcardImageMimeType,
-} from "@/lib/cards/storage";
+import { CARD_IMAGE_MAX_BYTES, isCardImageMimeType } from "@/lib/cards/storage";
 import { cardImageMetadataSchema, cardTextSchema } from "@/lib/cards/schema";
 import type { CardImage } from "@/lib/cards/service";
 
@@ -66,10 +63,10 @@ async function readImageBlob(blob: Blob): Promise<MultipartImage> {
   if (blob.size === 0) {
     throw new MultipartFormError("Image is required");
   }
-  if (blob.size > FLASHCARD_IMAGE_MAX_BYTES) {
+  if (blob.size > CARD_IMAGE_MAX_BYTES) {
     throw new MultipartFormError("Image must be 5 MB or smaller");
   }
-  if (!isFlashcardImageMimeType(blob.type)) {
+  if (!isCardImageMimeType(blob.type)) {
     throw new MultipartFormError("Image must be JPEG, PNG, or WebP");
   }
   const name = blob instanceof File ? blob.name : "image";

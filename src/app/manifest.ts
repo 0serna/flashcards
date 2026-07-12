@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Flashcards",
     short_name: "Flashcards",
-    description: "A mobile-first flashcards PWA for spaced repetition study.",
+    description: "A mobile-first study PWA for spaced repetition review.",
     start_url: "/",
     display: "standalone",
     background_color: appBackgroundColor,

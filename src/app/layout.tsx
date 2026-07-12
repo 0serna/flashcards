@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Flashcards",
-  description: "A mobile-first flashcards PWA for spaced repetition study.",
+  description: "A mobile-first study PWA for spaced repetition review.",
 };
 
 export const viewport: Viewport = {

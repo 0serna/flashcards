@@ -127,7 +127,7 @@ describe("deck management flow", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders each flashcard as a clickable row that opens the edit view", async () => {
+  it("renders each card as a clickable row that opens the edit view", async () => {
     mocks.listActiveCards.mockResolvedValue([card]);
     mocks.countActiveCards.mockResolvedValue(1);
 
@@ -198,7 +198,7 @@ describe("deck management flow", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("marks compact front and back previews when a flashcard side has an image", async () => {
+  it("marks compact front and back previews when a card side has an image", async () => {
     mocks.listActiveCards.mockResolvedValue([cardWithImages]);
     mocks.countActiveCards.mockResolvedValue(1);
 
@@ -293,7 +293,7 @@ describe("deck management flow", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("surfaces study-due as the primary action when there are due flashcards", async () => {
+  it("surfaces study-due as the primary action when there are due cards", async () => {
     mocks.countActiveCards.mockResolvedValue(5);
     mocks.countDueReviewCards.mockResolvedValue(3);
 

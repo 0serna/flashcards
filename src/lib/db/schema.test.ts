@@ -5,7 +5,7 @@ import migration0001 from "../../../drizzle/0001_card_scheduling_state.sql?raw";
 import { cardReviews, cards, decks } from "./schema";
 import { cardReviewRating } from "./enums";
 
-describe("flashcard database schema", () => {
+describe("card database schema", () => {
   it("declares the card_review_rating enum values", () => {
     expect([...cardReviewRating]).toEqual([
       "remembered",
@@ -33,7 +33,7 @@ describe("flashcard database schema", () => {
     expect(migration).toContain("cards_back_has_content");
   });
 
-  it("adds explicit spaced-repetition state to flashcards", () => {
+  it("adds explicit spaced-repetition state to cards", () => {
     const migration = migration0001;
     expect(migration).toMatch(
       /ALTER TABLE "cards" ADD COLUMN "review_count" integer DEFAULT 0 NOT NULL/,
