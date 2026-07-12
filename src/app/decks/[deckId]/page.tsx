@@ -60,18 +60,13 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
         items={[{ label: "Home", href: "/" }, { label: deck.name }]}
       />
 
-      <header className="space-y-3 py-4">
+      <header className="space-y-3 py-2">
         <div className="flex items-center justify-between gap-3">
           <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-balance">
             {deck.name}
           </h1>
           <DeckActionsMenu deckId={deck.id} archiveAction={archiveAction} />
         </div>
-        {deck.description ? (
-          <p className="max-w-[70ch] text-sm leading-6 text-muted-foreground">
-            {deck.description}
-          </p>
-        ) : null}
         {safeCount > 0 ? (
           <div className="flex flex-wrap items-center gap-2">
             {dueNow > 0 ? (

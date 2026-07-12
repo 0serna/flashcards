@@ -157,14 +157,14 @@ describe("deck management flow", () => {
 
     render(await DeckDetailPage({ params: Promise.resolve({ deckId }) }));
 
-    const description = screen.getByText("Everyday words and short phrases.");
+    const deckTitle = screen.getByRole("heading", { name: "Spanish Basics" });
     const cardSection = screen.getByRole("region", { name: /cards/i });
     const cardsHeading = within(cardSection).getByRole("heading", {
       name: /cards.*1/i,
     });
 
     expect(
-      description.compareDocumentPosition(cardsHeading) &
+      deckTitle.compareDocumentPosition(cardsHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
