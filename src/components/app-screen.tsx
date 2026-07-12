@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type React from "react";
 
 import { cn } from "@/lib/utils";
 
 import { Header } from "./app/header";
 import { NavigationHistoryTracker } from "./app/navigation-history-tracker";
+import { NavigationLoading } from "./app/navigation-loading";
 
 type AppScreenVariant = "fill" | "centered";
 
@@ -57,6 +59,9 @@ export function AppScreen({
         {signOutAction && !isCentered ? (
           <>
             <NavigationHistoryTracker />
+            <Suspense fallback={null}>
+              <NavigationLoading />
+            </Suspense>
             <Header signOutAction={signOutAction} />
           </>
         ) : null}

@@ -8,6 +8,7 @@ import {
   markFormClean,
   UNSAVED_CHANGES_MESSAGE,
 } from "./dirty-form-store";
+import { announceNavigationStart } from "./navigation-loading";
 
 const DEFAULT_MESSAGE = UNSAVED_CHANGES_MESSAGE;
 
@@ -49,10 +50,11 @@ export function GuardedLink({
     if (isFormDirty()) {
       markFormClean();
     }
+    announceNavigationStart();
   }
 
   return (
-    <Link {...rest} onClick={handleClick}>
+    <Link {...rest} data-navigation-guarded="true" onClick={handleClick}>
       {children}
     </Link>
   );
