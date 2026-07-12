@@ -56,6 +56,25 @@ The system SHALL keep authentication routes and required static application asse
 - **WHEN** a browser requests framework assets, icon assets, or the web app manifest
 - **THEN** the system SHALL serve those assets without redirecting to login
 
+#### Scenario: Failed screen requests session recovery
+
+- **WHEN** a browser submits `POST /auth/recover`
+- **THEN** the system SHALL process the request without requiring an operable authenticated screen
+
+### Requirement: Sign-out ends the local session
+
+The system SHALL end only the current browser session when a user signs out normally or exits a failed screen through session recovery.
+
+#### Scenario: Authenticated user signs out normally
+
+- **WHEN** an authenticated user activates Sign-out
+- **THEN** the system SHALL end the session on the current browser without signing the user out on other devices and SHALL redirect to `/login`
+
+#### Scenario: Authentication service is unavailable during recovery
+
+- **WHEN** failed-screen recovery cannot complete sign-out through Supabase Auth
+- **THEN** the system SHALL still clear the local Supabase authentication cookies and redirect to `/login`
+
 ### Requirement: Login form uses shared UI controls
 
 The system SHALL render the passwordless login interface using the shared UI component foundation for its visible controls without changing authentication behavior.

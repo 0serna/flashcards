@@ -76,3 +76,17 @@ The system SHALL use Drizzle ORM schema definitions and migrations as the source
 
 - **WHEN** the repository quality checks are run
 - **THEN** the database schema and migration configuration SHALL be included without TypeScript, lint, or test failures
+
+### Requirement: Database connections support serverless execution
+
+The system SHALL use separately configured runtime and migration database connections so horizontally scaled application instances cannot exhaust migration-oriented or session-oriented connection capacity.
+
+#### Scenario: Application opens a runtime database connection
+
+- **WHEN** a serverless application instance accesses Supabase Postgres
+- **THEN** it SHALL use the bounded runtime connection pool intended for transaction-oriented serverless workloads
+
+#### Scenario: Deployment applies database migrations
+
+- **WHEN** the production deployment applies Drizzle or Supabase migrations
+- **THEN** it SHALL use the separately configured migration connection rather than the application runtime connection

@@ -51,6 +51,25 @@ The system SHALL render one consistent global header on every authenticated view
 - **WHEN** an authenticated view renders the global header
 - **THEN** the header SHALL contain no additional primary navigation destinations beyond the existing Home logo link and account menu
 
+### Requirement: Failed screens provide independent recovery
+
+The system SHALL provide recovery actions when a route-level or global rendering error prevents a screen from operating normally.
+
+#### Scenario: User retries a failed screen
+
+- **WHEN** a route-level or global error surface is displayed
+- **THEN** the surface SHALL let the user retry rendering the failed screen
+
+#### Scenario: User exits a persistent failure
+
+- **WHEN** retrying does not recover the failed screen
+- **THEN** the surface SHALL provide a document-level POST action that ends the local session and redirects to `/login` without depending on Home or client-side navigation
+
+#### Scenario: Error can be correlated with production logs
+
+- **WHEN** the rendering error includes an error reference
+- **THEN** the surface SHALL display the reference in a selectable form
+
 ### Requirement: Contextual navigation identifies the current view
 
 The system SHALL render semantic contextual navigation for every nested authenticated view, showing deterministic parent destinations and the current view as the current location.
