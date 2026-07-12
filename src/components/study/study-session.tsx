@@ -3,6 +3,7 @@
 import { RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type KeyboardEvent } from "react";
 import { ViewTransition } from "react";
 
@@ -65,64 +66,83 @@ export function StudySession({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justRated, setJustRated] = useState<StudyRating | null>(null);
+  const [endedEarly, setEndedEarly] = useState(false);
+
+  const router = useRouter();
+
+  function handleEndSession() {
+    if (studied === 0) {
+      router.replace(`/decks/${deckId}`);
+      return;
+    }
+    setEndedEarly(true);
+  }
 
   if (orderedCards.length === 0) {
     return (
       <ViewTransition name="study-empty" default="none">
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {mode === "review"
-              ? "No flashcards are due right now."
-              : "This deck has no active flashcards."}
-          </p>
-          {mode === "review" ? (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <p className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+              {mode === "review"
+                ? "You're all caught up."
+                : "This deck has no active flashcards."}
+            </p>
+            <p className="text-sm leading-6 text-muted-foreground text-balance">
+              {mode === "review"
+                ? "No cards are due for review right now. Come back later, or practice the deck to keep moving."
+                : "Add some cards to start studying."}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {mode === "review" ? (
+              <Button asChild className="w-full">
+                <Link
+                  href={`/decks/${deckId}/study?mode=practice`}
+                  prefetch={false}
+                >
+                  Practice anyway
+                </Link>
+              </Button>
+            ) : null}
             <Button asChild variant="secondary" className="w-full">
-              <Link
-                href={`/decks/${deckId}/study?mode=practice`}
-                prefetch={false}
-              >
-                Practice anyway
+              <Link replace href={`/decks/${deckId}`}>
+                Back to {deckName}
               </Link>
             </Button>
-          ) : null}
-          <Button asChild variant="secondary" className="w-full">
-            <Link replace href={`/decks/${deckId}`}>
-              Back to {deckName}
-            </Link>
-          </Button>
+          </div>
         </div>
       </ViewTransition>
     );
   }
 
-  if (index >= orderedCards.length) {
+  if (endedEarly || index >= orderedCards.length) {
     return (
       <ViewTransition name="study-summary" default="none">
-        <div className={cn("space-y-5", styles.summaryBlock)}>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              You studied {studied} {studied === 1 ? "card" : "cards"}.
+        <div className={cn("space-y-7", styles.summaryBlock)}>
+          <div className="space-y-3">
+            <p className="text-sm font-medium tracking-wide text-muted-foreground">
+              {endedEarly ? "Session ended" : "Session complete"}
             </p>
-            <dl className="grid grid-cols-3 gap-2 text-center text-sm">
-              {RATING_ORDER.map((rating, summaryIndex) => (
-                <div
-                  key={rating}
-                  className={cn(
-                    "rounded-lg border border-border px-2 py-3",
-                    styles.summaryCell,
-                  )}
-                  style={{ ["--summary-i" as string]: summaryIndex }}
-                >
-                  <dt className="text-xs text-muted-foreground">
-                    {RATING_LABELS[rating]}
-                  </dt>
-                  <dd className="mt-1 text-lg font-semibold">
-                    {ratingCounts[rating]}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <p className="text-6xl font-semibold tracking-tight text-balance sm:text-7xl">
+              {studied}
+            </p>
+            <p className="text-base leading-6 text-foreground text-balance">
+              {studied === 1 ? "card" : "cards"} from {deckName}
+            </p>
           </div>
+          <dl className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
+            {RATING_ORDER.map((rating) => (
+              <div key={rating} className="flex items-baseline gap-1.5">
+                <dt className="text-muted-foreground">
+                  {RATING_LABELS[rating]}
+                </dt>
+                <dd className="font-semibold text-foreground">
+                  {ratingCounts[rating]}
+                </dd>
+              </div>
+            ))}
+          </dl>
           <Button asChild className="w-full">
             <Link replace href={`/decks/${deckId}`}>
               Back to {deckName}
@@ -137,6 +157,8 @@ export function StudySession({
   if (!current) {
     return null;
   }
+  const total = orderedCards.length;
+  const progressLabel = `Card ${index + 1} of ${total}`;
 
   async function handleRate(rating: StudyRating) {
     if (pending) return;
@@ -170,19 +192,22 @@ export function StudySession({
   return (
     <ViewTransition name="study-card" default="none">
       <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-muted-foreground">
-            {mode === "review" ? "Review" : "Practice"} · {index + 1}/
-            {orderedCards.length}
-          </p>
-          <Link
-            href={`/decks/${deckId}`}
-            replace
-            className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-          >
-            End session
-          </Link>
-        </div>
+        <header>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-muted-foreground">
+              {progressLabel}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={handleEndSession}
+              className="shrink-0"
+            >
+              End session
+            </Button>
+          </div>
+        </header>
 
         <article
           key={current.id}
@@ -194,7 +219,7 @@ export function StudySession({
             role="button"
             tabIndex={0}
             aria-pressed={revealed}
-            aria-label={revealed ? "Show question" : "Show answer"}
+            aria-label={revealed ? "Show front" : "Show back"}
             onClick={() => setRevealed((value) => !value)}
             onKeyDown={handleCardKeyDown}
           >
@@ -205,13 +230,13 @@ export function StudySession({
             >
               <div className={styles.cardFace} aria-hidden={revealed}>
                 <CardFace
-                  label="Question"
+                  label="Front"
                   text={current.front.text}
                   imageUrl={current.front.imageUrl}
                 />
                 <span className={styles.flipHint}>
                   <RotateCcw aria-hidden="true" />
-                  Tap or click to reveal answer
+                  Tap or click to reveal back
                 </span>
               </div>
               <div
@@ -219,13 +244,13 @@ export function StudySession({
                 aria-hidden={!revealed}
               >
                 <CardFace
-                  label="Answer"
+                  label="Back"
                   text={current.back.text}
                   imageUrl={current.back.imageUrl}
                 />
                 <span className={styles.flipHint}>
                   <RotateCcw aria-hidden="true" />
-                  Tap or click to see question
+                  Tap or click to see front
                 </span>
               </div>
             </div>
@@ -248,7 +273,7 @@ export function StudySession({
               <Button
                 key={rating}
                 type="button"
-                variant="outline"
+                variant={rating === "remembered" ? "default" : "outline"}
                 disabled={pending}
                 onClick={() => handleRate(rating)}
                 className={cn("min-w-0 flex-1 px-2", styles.ratingButton)}
@@ -281,7 +306,12 @@ function CardFace({
     <div className="flex w-full flex-col items-center gap-5 text-center">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       {text ? (
-        <p className="max-w-prose whitespace-pre-wrap break-words text-xl leading-8 text-balance sm:text-2xl">
+        <p
+          className={cn(
+            "max-w-prose whitespace-pre-wrap break-words text-balance",
+            styles.cardText,
+          )}
+        >
           {text}
         </p>
       ) : null}
