@@ -3,7 +3,7 @@
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { GuardedLink } from "@/components/app/guarded-link";
 import { markFormClean } from "@/components/app/dirty-form-store";
@@ -79,6 +79,15 @@ export function FlashcardForm({
     selectedAction: FormAction,
     formData: FormData,
   ): Promise<boolean> {
+    if (front.removeImage) {
+      formData.delete("frontImage");
+      formData.append("frontImage", "clear");
+    }
+    if (back.removeImage) {
+      formData.delete("backImage");
+      formData.append("backImage", "clear");
+    }
+
     try {
       await selectedAction(await optimizeFormDataImages(formData));
       return true;
@@ -227,6 +236,23 @@ function SideEditor({
   imageId: string;
   edit: boolean;
 }) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
+
+  function revokePreviewUrl() {
+    if (!previewUrlRef.current) return;
+    URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = null;
+  }
+
+  useEffect(() => revokePreviewUrl, []);
+
+  function removeImage() {
+    if (imageInputRef.current) imageInputRef.current.value = "";
+    revokePreviewUrl();
+    onChange({ ...value, removeImage: true });
+  }
+
   return (
     <div className="space-y-2">
       <Label htmlFor={fieldId}>{label}</Label>
@@ -244,7 +270,7 @@ function SideEditor({
         }
         className="flex min-h-28 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm"
       />
-      <div className="flex flex-col gap-2 rounded-md border border-dashed border-border p-3">
+      <div className="flex flex-col gap-2 rounded-md border border-dashed border-border p-3 focus-within:ring-1 focus-within:ring-ring">
         {value.imageUrl && !value.removeImage ? (
           <div className="relative overflow-hidden rounded-md">
             <Image
@@ -261,7 +287,7 @@ function SideEditor({
               variant="secondary"
               aria-label={`Remove ${label.toLowerCase()} image`}
               className="absolute right-2 top-2"
-              onClick={() => onChange({ ...value, removeImage: true })}
+              onClick={removeImage}
             >
               <X aria-hidden="true" />
             </Button>
@@ -281,6 +307,7 @@ function SideEditor({
           </label>
         )}
         <input
+          ref={imageInputRef}
           id={imageId}
           name={`${side}Image`}
           type="file"
@@ -289,7 +316,9 @@ function SideEditor({
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (!file) return;
+            revokePreviewUrl();
             const url = URL.createObjectURL(file);
+            previewUrlRef.current = url;
             onChange({ ...value, imageUrl: url, removeImage: false });
           }}
         />

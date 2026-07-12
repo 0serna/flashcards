@@ -1,10 +1,19 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { createCard, deleteImage, updateCard, toCard } from "./service";
+import {
+  createCard,
+  deleteImage,
+  signCardImages,
+  toCard,
+  updateCard,
+} from "./service";
 
 const supabaseState = {
   removals: [] as Array<{ paths: string[] }>,
-  signedUrls: [] as Array<{ path: string }>,
+  signedUrls: [] as Array<{
+    path: string;
+    transform?: { height: number; resize: "contain"; width: number };
+  }>,
   uploads: [] as Array<{ path: string; type?: string }>,
 };
 
@@ -14,8 +23,17 @@ function createMockSupabase(
   return {
     storage: {
       from: () => ({
-        createSignedUrl: async (path: string) => {
-          supabaseState.signedUrls.push({ path });
+        createSignedUrl: async (
+          path: string,
+          _expiresIn: number,
+          createSignedUrlOptions?: {
+            transform?: { height: number; resize: "contain"; width: number };
+          },
+        ) => {
+          supabaseState.signedUrls.push({
+            path,
+            transform: createSignedUrlOptions?.transform,
+          });
           return {
             data:
               options.signedUrl === null
@@ -48,6 +66,39 @@ beforeEach(() => {
   supabaseState.removals = [];
   supabaseState.signedUrls = [];
   supabaseState.uploads = [];
+});
+
+describe("signCardImages", () => {
+  it("creates proportion-preserving preview URLs when a transform is requested", async () => {
+    const supabase = createMockSupabase();
+
+    await signCardImages(
+      supabase,
+      {
+        id: "c1",
+        deckId: "d1",
+        frontText: null,
+        frontImagePath: "deck/card/front/x.jpg",
+        backText: null,
+        backImagePath: "deck/card/back/x.jpg",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        archivedAt: null,
+      },
+      { width: 640, height: 480, resize: "contain" },
+    );
+
+    expect(supabaseState.signedUrls).toEqual([
+      {
+        path: "deck/card/front/x.jpg",
+        transform: { width: 640, height: 480, resize: "contain" },
+      },
+      {
+        path: "deck/card/back/x.jpg",
+        transform: { width: 640, height: 480, resize: "contain" },
+      },
+    ]);
+  });
 });
 
 describe("toCard", () => {

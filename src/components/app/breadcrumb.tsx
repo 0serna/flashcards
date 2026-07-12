@@ -42,7 +42,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
           }
 
           const linkClass =
-            "flex min-w-0 items-center gap-1 truncate rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+            "flex min-h-11 min-w-0 items-center gap-1 truncate rounded-sm px-3 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
           return (
             <li

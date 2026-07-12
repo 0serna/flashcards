@@ -30,7 +30,11 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
   const user = await getAuthenticatedUser(supabase);
   if (!user) notFound();
 
-  const card = await getActiveCard(getDb(), supabase, user.id, deckId, cardId);
+  const card = await getActiveCard(getDb(), supabase, user.id, deckId, cardId, {
+    width: 640,
+    height: 480,
+    resize: "contain",
+  });
   if (!card) notFound();
 
   const updateAction = updateCardAction.bind(null, deck.id, card.id);

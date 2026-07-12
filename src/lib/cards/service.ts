@@ -36,6 +36,12 @@ export type Card = {
   updatedAt: string;
 };
 
+type CardImageTransform = {
+  height: number;
+  resize: "contain";
+  width: number;
+};
+
 type CardRow = {
   id: string;
   deckId: string;
@@ -99,14 +105,17 @@ async function getOwnedActiveDeckRow(
 export async function signCardImages(
   supabase: SupabaseClient,
   row: CardRow,
+  transform?: CardImageTransform,
 ): Promise<{ front: string | null; back: string | null }> {
   const urls = { front: null as string | null, back: null as string | null };
+  const options = transform ? { transform } : undefined;
   if (row.frontImagePath) {
     const { data } = await supabase.storage
       .from(FLASHCARD_IMAGE_BUCKET)
       .createSignedUrl(
         row.frontImagePath,
         FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS,
+        options,
       );
     urls.front = data?.signedUrl ?? null;
   }
@@ -116,6 +125,7 @@ export async function signCardImages(
       .createSignedUrl(
         row.backImagePath,
         FLASHCARD_IMAGE_SIGNED_URL_TTL_SECONDS,
+        options,
       );
     urls.back = data?.signedUrl ?? null;
   }
@@ -166,6 +176,7 @@ export async function getActiveCard(
   userId: string,
   deckId: string,
   cardId: string,
+  imageTransform?: CardImageTransform,
 ): Promise<Card | null> {
   const rows = await db
     .select()
@@ -181,7 +192,7 @@ export async function getActiveCard(
   if (!row) return null;
   const deck = await getOwnedActiveDeckRow(db, userId, deckId);
   if (!deck) return null;
-  return toCard(row, await signCardImages(supabase, row));
+  return toCard(row, await signCardImages(supabase, row, imageTransform));
 }
 
 export type CreateCardInput = {

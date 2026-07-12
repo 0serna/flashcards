@@ -22,6 +22,7 @@ afterEach(() => {
   router.back.mockReset();
   router.replace.mockReset();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 beforeEach(() => {
@@ -153,6 +154,44 @@ describe("FlashcardForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Could not create the card. Try again.",
     );
+  });
+
+  it("submits only the clear instruction after removing a selected replacement image", async () => {
+    const revokeObjectURL = vi.fn();
+    class MockUrl extends URL {
+      static createObjectURL = vi.fn(() => "blob:front-preview");
+      static revokeObjectURL = revokeObjectURL;
+    }
+    vi.stubGlobal("URL", MockUrl);
+    const user = userEvent.setup();
+    const action = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <FlashcardForm
+        mode="edit"
+        action={action}
+        cancelHref="/decks/deck-1"
+        submitLabel="Save changes"
+        initial={{
+          front: { text: "Question", imageUrl: null },
+          back: { text: "Answer", imageUrl: null },
+        }}
+      />,
+    );
+
+    await user.upload(
+      screen.getByLabelText(/replace front image/i),
+      new File(["replacement"], "replacement.png", { type: "image/png" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /remove front image/i }),
+    );
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:front-preview");
+    await user.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => expect(action).toHaveBeenCalledOnce());
+    const submitted = action.mock.calls[0]?.[0] as FormData;
+    expect(submitted.getAll("frontImage")).toEqual(["clear"]);
   });
 
   it("shows inline validation when a side has no text or image", async () => {
