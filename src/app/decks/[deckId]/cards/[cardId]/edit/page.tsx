@@ -50,10 +50,6 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
         <h1 className="text-3xl font-semibold tracking-tight text-balance">
           Edit card
         </h1>
-        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-          Update text, replace an image, or remove an image when the side keeps
-          content. Your changes save to this active card.
-        </p>
       </header>
 
       <div className="space-y-6">

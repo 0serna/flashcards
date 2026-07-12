@@ -60,27 +60,23 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
         items={[{ label: "Home", href: "/" }, { label: deck.name }]}
       />
 
-      <header className="py-8">
-        <p className="text-sm text-muted-foreground">Deck</p>
-        <div className="relative mt-2 flex items-start justify-between gap-4">
-          <h1 className="min-w-0 break-words text-3xl font-semibold tracking-tight text-balance">
-            {deck.name}
-          </h1>
+      <header className="space-y-4 py-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-balance">
+              {deck.name}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {dueNow > 0
+                ? `${dueNow} due now · ${safeCount} ${safeCount === 1 ? "card" : "cards"}`
+                : `${safeCount} ${safeCount === 1 ? "card" : "cards"}`}
+            </p>
+          </div>
           <DeckActionsMenu deckId={deck.id} archiveAction={archiveAction} />
         </div>
-        {deck.description ? (
-          <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-            {deck.description}
-          </p>
-        ) : null}
-        <p className="mt-3 text-sm text-muted-foreground">
-          {dueNow > 0
-            ? `${dueNow} due now · ${safeCount} ${safeCount === 1 ? "card" : "cards"}`
-            : `${safeCount} ${safeCount === 1 ? "card" : "cards"}`}
-        </p>
-        <div className="mt-5 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
           {dueNow > 0 ? (
-            <Button asChild className="w-full">
+            <Button asChild size="sm">
               <Link
                 href={`/decks/${deck.id}/study?mode=review`}
                 prefetch={false}
@@ -90,11 +86,7 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
             </Button>
           ) : null}
           {safeCount > 0 ? (
-            <Button
-              asChild
-              variant={dueNow > 0 ? "secondary" : "default"}
-              className="w-full"
-            >
+            <Button asChild size="sm" variant="secondary">
               <Link
                 href={`/decks/${deck.id}/study?mode=practice`}
                 prefetch={false}
@@ -103,13 +95,18 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
               </Link>
             </Button>
           ) : null}
+          <Button asChild size="sm" variant="ghost">
+            <Link href={`/decks/${deck.id}/cards/new`}>
+              <Plus aria-hidden="true" />
+              Add card
+            </Link>
+          </Button>
         </div>
-        <Button asChild variant="ghost" className="mt-2 w-full">
-          <Link href={`/decks/${deck.id}/cards/new`}>
-            <Plus aria-hidden="true" />
-            Add card
-          </Link>
-        </Button>
+        {deck.description ? (
+          <p className="text-sm leading-6 text-muted-foreground">
+            {deck.description}
+          </p>
+        ) : null}
       </header>
 
       {safeCards.length > 0 ? (

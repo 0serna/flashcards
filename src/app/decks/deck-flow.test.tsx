@@ -328,7 +328,6 @@ describe("deck management flow", () => {
     expect(
       screen.getByRole("button", { name: /archive card/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/active card/i)).toBeInTheDocument();
     expect(screen.queryByText(/stays archived/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/mocked for now/i)).not.toBeInTheDocument();
     // Edit card breadcrumb: Home / [Deck] / Edit card.

@@ -36,14 +36,9 @@ export default async function Home() {
   return (
     <AppScreen signOutAction={signOutAction} maxWidthClass="max-w-2xl">
       <section className="pt-8">
-        <p className="text-sm text-muted-foreground">Good evening</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">
+        <h1 className="text-3xl font-semibold tracking-tight text-balance">
           What do you want to study today?
         </h1>
-        <p className="mt-3 max-w-sm text-base leading-7 text-muted-foreground">
-          Open a deck you already have, or create a small one for the next thing
-          you want to remember.
-        </p>
       </section>
 
       <section className="mt-8 flex-1">

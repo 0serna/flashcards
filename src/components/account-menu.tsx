@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, MoreHorizontal } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export function AccountMenu({
         aria-haspopup="menu"
         onClick={() => setOpen((current) => !current)}
       >
-        <MoreHorizontal aria-hidden="true" />
+        <Settings aria-hidden="true" />
       </Button>
 
       {open ? (
