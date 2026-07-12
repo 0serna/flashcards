@@ -19,7 +19,8 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+      SUPABASE_RUNTIME_DATABASE_URL: ${{ secrets.SUPABASE_RUNTIME_DATABASE_URL }}
+      SUPABASE_MIGRATION_DATABASE_URL: ${{ secrets.SUPABASE_MIGRATION_DATABASE_URL }}
 
     steps:
       - name: Checkout
@@ -38,7 +39,7 @@ jobs:
         run: npm run db:migrate
 
       - name: Migrate production Supabase platform resources
-        run: npx supabase db push --db-url "$SUPABASE_DATABASE_URL"
+        run: npx supabase db push --db-url "$SUPABASE_MIGRATION_DATABASE_URL"
 
       - name: Pull Vercel production environment
         run: npx vercel pull --yes --environment=production

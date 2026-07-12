@@ -6,10 +6,10 @@ if (existsSync(".env.local")) {
   loadEnvFile(".env.local");
 }
 
-const databaseUrl = process.env.SUPABASE_DATABASE_URL;
+const databaseUrl = process.env.SUPABASE_MIGRATION_DATABASE_URL;
 if (!databaseUrl) {
   throw new Error(
-    "SUPABASE_DATABASE_URL is required to run drizzle-kit commands.",
+    "SUPABASE_MIGRATION_DATABASE_URL is required to run drizzle-kit commands.",
   );
 }
 

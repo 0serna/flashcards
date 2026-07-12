@@ -34,7 +34,7 @@ describe("signOutAction", () => {
 
     await expect(signOutAction()).rejects.toThrow("NEXT_REDIRECT");
 
-    expect(signOut).toHaveBeenCalledWith();
+    expect(signOut).toHaveBeenCalledWith({ scope: "local" });
     expect(mocks.redirect).toHaveBeenCalledWith("/login");
   });
 });
