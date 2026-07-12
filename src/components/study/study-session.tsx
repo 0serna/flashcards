@@ -61,7 +61,7 @@ export function StudySession({
   initialCards,
   submitRating,
 }: StudySessionProps) {
-  const orderedCards = initialCards;
+  const [orderedCards] = useState(() => initialCards);
 
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -206,104 +206,102 @@ export function StudySession({
   }
 
   return (
-    <ViewTransition name="study-card" default="none">
-      <div className="space-y-5">
-        <header>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-muted-foreground">
-              {progressLabel}
-            </p>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={pending}
-              onClick={handleEndSession}
-              className="shrink-0"
-            >
-              End session
-            </Button>
-          </div>
-        </header>
+    <div className="space-y-5">
+      <header>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-muted-foreground">
+            {progressLabel}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={pending}
+            onClick={handleEndSession}
+            className="shrink-0"
+          >
+            End session
+          </Button>
+        </div>
+      </header>
 
-        <article
-          key={current.id}
-          className={styles.cardStage}
-          aria-label="Study card"
+      <article
+        key={current.id}
+        className={styles.cardStage}
+        aria-label="Study card"
+      >
+        <div
+          className={styles.card}
+          role="button"
+          tabIndex={0}
+          aria-pressed={revealed}
+          aria-label={revealed ? "Show front" : "Show back"}
+          onClick={() => setRevealed((value) => !value)}
+          onKeyDown={handleCardKeyDown}
         >
           <div
-            className={styles.card}
-            role="button"
-            tabIndex={0}
-            aria-pressed={revealed}
-            aria-label={revealed ? "Show front" : "Show back"}
-            onClick={() => setRevealed((value) => !value)}
-            onKeyDown={handleCardKeyDown}
+            className={styles.cardInner}
+            data-revealed={revealed}
+            aria-live="polite"
           >
+            <div className={styles.cardFace} aria-hidden={revealed}>
+              <CardFace
+                label="Front"
+                text={current.front.text}
+                imageUrl={current.front.imageUrl}
+              />
+              <span className={styles.flipHint}>
+                <RotateCcw aria-hidden="true" />
+                Tap or click to reveal back
+              </span>
+            </div>
             <div
-              className={styles.cardInner}
-              data-revealed={revealed}
-              aria-live="polite"
+              className={`${styles.cardFace} ${styles.cardBack}`}
+              aria-hidden={!revealed}
             >
-              <div className={styles.cardFace} aria-hidden={revealed}>
-                <CardFace
-                  label="Front"
-                  text={current.front.text}
-                  imageUrl={current.front.imageUrl}
-                />
-                <span className={styles.flipHint}>
-                  <RotateCcw aria-hidden="true" />
-                  Tap or click to reveal back
-                </span>
-              </div>
-              <div
-                className={`${styles.cardFace} ${styles.cardBack}`}
-                aria-hidden={!revealed}
-              >
-                <CardFace
-                  label="Back"
-                  text={current.back.text}
-                  imageUrl={current.back.imageUrl}
-                />
-                <span className={styles.flipHint}>
-                  <RotateCcw aria-hidden="true" />
-                  Tap or click to see front
-                </span>
-              </div>
+              <CardFace
+                label="Back"
+                text={current.back.text}
+                imageUrl={current.back.imageUrl}
+              />
+              <span className={styles.flipHint}>
+                <RotateCcw aria-hidden="true" />
+                Tap or click to see front
+              </span>
             </div>
           </div>
-        </article>
+        </div>
+      </article>
 
-        {error ? (
-          <p
-            key={error}
-            className={cn("text-sm text-destructive", styles.errorMessage)}
-            role="alert"
-          >
-            {error}
-          </p>
-        ) : null}
+      {error ? (
+        <p
+          key={error}
+          className={cn("text-sm text-destructive", styles.errorMessage)}
+          role="alert"
+        >
+          {error}
+        </p>
+      ) : null}
 
-        {revealed ? (
-          <div className="flex gap-2">
-            {RATING_ORDER.map((rating, ratingIndex) => (
-              <Button
-                key={rating}
-                type="button"
-                variant={rating === "remembered" ? "default" : "outline"}
-                disabled={pending}
-                onClick={() => handleRate(rating)}
-                className={cn("min-w-0 flex-1 px-2", styles.ratingButton)}
-                data-rating={rating}
-                data-just-rated={justRated === rating ? "true" : undefined}
-                style={{ ["--rating-i" as string]: ratingIndex }}
-              >
-                {RATING_LABELS[rating]}
-              </Button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </ViewTransition>
+      {revealed ? (
+        <div className="flex gap-2">
+          {RATING_ORDER.map((rating, ratingIndex) => (
+            <Button
+              key={rating}
+              type="button"
+              variant={rating === "remembered" ? "default" : "outline"}
+              disabled={pending}
+              onClick={() => handleRate(rating)}
+              className={cn("min-w-0 flex-1 px-2", styles.ratingButton)}
+              data-rating={rating}
+              data-just-rated={justRated === rating ? "true" : undefined}
+              style={{ ["--rating-i" as string]: ratingIndex }}
+            >
+              {RATING_LABELS[rating]}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

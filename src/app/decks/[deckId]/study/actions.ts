@@ -39,6 +39,5 @@ export async function submitRatingAction(
   }
 
   revalidatePath(`/decks/${id}`);
-  revalidatePath(`/decks/${id}/study`);
   return { ok: true };
 }

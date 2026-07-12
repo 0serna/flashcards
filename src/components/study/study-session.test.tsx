@@ -165,6 +165,37 @@ describe("StudySession", () => {
     expect(remembered.style.getPropertyValue("--rating-i")).toBe("2");
   });
 
+  it("keeps the session queue stable when server props refresh", async () => {
+    const user = userEvent.setup();
+    const submitRating = vi.fn().mockResolvedValue({ ok: true });
+    const { rerender } = render(
+      <StudySession
+        mode="review"
+        deckId="deck-1"
+        deckName="Spanish Basics"
+        initialCards={cards}
+        submitRating={submitRating}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /show back/i }));
+
+    rerender(
+      <StudySession
+        mode="review"
+        deckId="deck-1"
+        deckName="Spanish Basics"
+        initialCards={[cards[1]]}
+        submitRating={submitRating}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /i knew it/i }));
+
+    expect(screen.getByText("Adiós")).toBeInTheDocument();
+    expect(screen.getByText("Card 2 of 2")).toBeInTheDocument();
+  });
+
   it("remounts the card article when advancing to the next card", async () => {
     const user = userEvent.setup();
     const submitRating = vi.fn().mockResolvedValue({ ok: true });

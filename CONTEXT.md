@@ -48,6 +48,10 @@ _Avoid_: streak system, quiz score, game progression
 An ephemeral run where a user answers cards from one deck; each answer is saved independently as review history.
 _Avoid_: saved session, test attempt, exam
 
+**Session queue**:
+The ordered, stable list of cards captured when a study session begins; saving answers or refreshing server data does not replace it during that session.
+_Avoid_: live due list, persisted session, deck order
+
 **Private image cache**:
 A best-effort browser-profile cache of private card images that speeds up repeat study and may remain available for 30 days after sign-out.
 _Avoid_: shared media library, account-wide cache

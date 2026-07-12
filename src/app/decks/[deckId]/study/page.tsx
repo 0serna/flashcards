@@ -91,6 +91,7 @@ export default async function StudyPage({
       />
 
       <StudySession
+        key={`${deck.id}:${resolvedMode}`}
         mode={resolvedMode}
         deckId={deck.id}
         deckName={deck.name}
