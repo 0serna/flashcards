@@ -4,6 +4,10 @@ import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { Button } from "@/components/ui/button";
+import {
+  DividedList,
+  DividedListStackedRow,
+} from "@/components/ui/divided-list";
 import { getDb } from "@/lib/db/client";
 import { getAuthenticatedUser } from "@/lib/decks/service";
 import { listArchivedCards } from "@/lib/cards/service";
@@ -53,7 +57,7 @@ export default async function ArchivedCardsPage({
       </header>
 
       {cards && cards.length > 0 ? (
-        <div className="divide-y divide-border rounded-xl border border-border bg-background">
+        <DividedList>
           {cards.map((card) => {
             const restoreAction = restoreCardAction.bind(
               null,
@@ -61,7 +65,7 @@ export default async function ArchivedCardsPage({
               card.id,
             );
             return (
-              <div key={card.id} className="min-w-0 space-y-3 p-4">
+              <DividedListStackedRow key={card.id}>
                 <div className="min-w-0 space-y-1">
                   <p className="break-words text-sm font-medium">
                     {card.front.text ?? "Image only"}
@@ -79,10 +83,10 @@ export default async function ArchivedCardsPage({
                     Restore card
                   </Button>
                 </form>
-              </div>
+              </DividedListStackedRow>
             );
           })}
-        </div>
+        </DividedList>
       ) : (
         <p className="rounded-xl border border-border bg-background p-4 text-sm text-muted-foreground">
           No archived cards.

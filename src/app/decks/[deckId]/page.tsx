@@ -7,6 +7,7 @@ import { AppScreen } from "@/components/app-screen";
 import { CardActionsMenu } from "@/components/cards/card-actions-menu";
 import { DeckActionsMenu } from "@/components/decks/deck-actions-menu";
 import { Button } from "@/components/ui/button";
+import { DividedList, DividedListRow } from "@/components/ui/divided-list";
 import { getDb } from "@/lib/db/client";
 import { loadOwnedActiveDeck } from "@/lib/decks/route-helpers";
 import { getAuthenticatedUser } from "@/lib/decks/service";
@@ -109,7 +110,7 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
       </header>
 
       {safeCards.length > 0 ? (
-        <section className="space-y-3">
+        <DividedList>
           {safeCards.map((card) => {
             const cardArchiveAction = archiveCardAction.bind(
               null,
@@ -117,10 +118,7 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
               card.id,
             );
             return (
-              <article
-                key={card.id}
-                className="flex items-start justify-between gap-3 rounded-xl border border-border bg-background p-4"
-              >
+              <DividedListRow key={card.id}>
                 <div className="min-w-0 space-y-1">
                   <p className="flex min-w-0 items-center gap-2 break-words text-sm font-medium">
                     {sideHasImage(card.front) ? (
@@ -150,10 +148,10 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
                   cardId={card.id}
                   archiveAction={cardArchiveAction}
                 />
-              </article>
+              </DividedListRow>
             );
           })}
-        </section>
+        </DividedList>
       ) : null}
     </AppScreen>
   );

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { signOutAction } from "@/app/auth/actions";
 import { AppScreen } from "@/components/app-screen";
 import { Button } from "@/components/ui/button";
+import { DividedList, DividedListRow } from "@/components/ui/divided-list";
 import { getDb } from "@/lib/db/client";
 import {
   getAuthenticatedUser,
@@ -57,34 +58,36 @@ export default async function Home() {
         </div>
 
         {decks.length > 0 ? (
-          <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-background">
+          <DividedList className="mt-3">
             {decks.map((deck, index) => {
               const count = counts[index] ?? 0;
               const due = dueCounts[index] ?? 0;
               return (
-                <Link
+                <DividedListRow
                   key={deck.id}
-                  href={`/decks/${deck.id}`}
-                  className="flex min-w-0 items-center justify-between gap-4 p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  asChild
+                  className="transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <span className="min-w-0">
-                    <span className="block break-words font-medium">
-                      {deck.name}
+                  <Link href={`/decks/${deck.id}`}>
+                    <span className="min-w-0">
+                      <span className="block break-words font-medium">
+                        {deck.name}
+                      </span>
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        {due > 0
+                          ? `${due} due now · ${count} ${count === 1 ? "card" : "cards"}`
+                          : `${count} ${count === 1 ? "card" : "cards"}`}
+                      </span>
                     </span>
-                    <span className="mt-1 block text-sm text-muted-foreground">
-                      {due > 0
-                        ? `${due} due now · ${count} ${count === 1 ? "card" : "cards"}`
-                        : `${count} ${count === 1 ? "card" : "cards"}`}
-                    </span>
-                  </span>
-                  <ChevronRight
-                    className="size-4 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                </Link>
+                    <ChevronRight
+                      className="size-4 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </DividedListRow>
               );
             })}
-          </div>
+          </DividedList>
         ) : (
           <div className="mt-3 rounded-xl border border-border bg-background p-4">
             <p className="font-medium">Create your first deck</p>

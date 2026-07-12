@@ -4,6 +4,10 @@ import { signOutAction } from "@/app/auth/actions";
 import { Breadcrumb } from "@/components/app/breadcrumb";
 import { AppScreen } from "@/components/app-screen";
 import { Button } from "@/components/ui/button";
+import {
+  DividedList,
+  DividedListStackedRow,
+} from "@/components/ui/divided-list";
 import { getDb } from "@/lib/db/client";
 import { getAuthenticatedUser, listArchivedDecks } from "@/lib/decks/service";
 import { countActiveCards } from "@/lib/cards/service";
@@ -39,12 +43,12 @@ export default async function ArchivedDecksPage() {
       </header>
 
       {decks.length > 0 ? (
-        <div className="divide-y divide-border rounded-xl border border-border bg-background">
+        <DividedList>
           {decks.map((deck, index) => {
             const restoreAction = restoreDeckAction.bind(null, deck.id);
             const count = counts[index] ?? 0;
             return (
-              <div key={deck.id} className="min-w-0 space-y-3 p-4">
+              <DividedListStackedRow key={deck.id}>
                 <div className="min-w-0">
                   <h2 className="break-words font-medium">{deck.name}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -60,10 +64,10 @@ export default async function ArchivedDecksPage() {
                     Restore {deck.name}
                   </Button>
                 </form>
-              </div>
+              </DividedListStackedRow>
             );
           })}
-        </div>
+        </DividedList>
       ) : (
         <p className="rounded-xl border border-border bg-background p-4 text-sm text-muted-foreground">
           No archived decks.
