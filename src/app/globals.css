@@ -23,6 +23,8 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.205 0 0);
   --radius: 0.625rem;
+  --scrollbar-thumb: oklch(0.4 0 0 / 0.5);
+  --scrollbar-thumb-hover: oklch(0.4 0 0 / 0.32);
 }
 
 .dark {
@@ -45,6 +47,8 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  --scrollbar-thumb: oklch(0.85 0 0 / 0.55);
+  --scrollbar-thumb-hover: oklch(0.85 0 0 / 0.35);
 }
 
 @theme inline {
@@ -71,4 +75,55 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  /* Page-level scrollbar: hidden at rest, fades in on hover and while
+   * the `is-scrolling` class is on <html> (toggled by <ScrollVisibility/>).
+   * `scrollbar-gutter: auto` keeps the gutter out of layout so the
+   * scrollbar doesn't reserve space when idle. */
+  html {
+    scrollbar-gutter: auto;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  html::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+    transition: background-color 220ms ease-out;
+  }
+
+  html:hover {
+    scrollbar-color: var(--scrollbar-thumb-hover) transparent;
+  }
+
+  html:hover::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  html.is-scrolling {
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  html.is-scrolling::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html::-webkit-scrollbar-thumb {
+    transition: none;
+  }
 }

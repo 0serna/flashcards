@@ -1,4 +1,6 @@
-import { LoginForm } from "@/app/login/login-form";
+import { AppScreen } from "@/components/app-screen";
+
+import { LoginForm } from "./login-form";
 
 export const metadata = {
   title: "Sign in · Flashcards",
@@ -19,8 +21,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       : undefined;
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-secondary/30 px-6 py-8 text-foreground">
+    <AppScreen variant="centered">
       <LoginForm authErrorMessage={authErrorMessage} />
-    </main>
+    </AppScreen>
   );
 }

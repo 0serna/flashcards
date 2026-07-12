@@ -33,11 +33,7 @@ export default async function ArchivedCardsPage({
   const cards = await listArchivedCards(getDb(), supabase, user.id, deck.id);
 
   return (
-    <AppScreen
-      contentClassName="py-4"
-      signOutAction={signOutAction}
-      maxWidthClass="max-w-2xl"
-    >
+    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },

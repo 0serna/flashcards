@@ -34,7 +34,7 @@ export default async function Home() {
   );
 
   return (
-    <AppScreen signOutAction={signOutAction} maxWidthClass="max-w-2xl">
+    <AppScreen signOutAction={signOutAction}>
       <section className="mt-8 flex-1">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold tracking-tight">Your decks</h2>

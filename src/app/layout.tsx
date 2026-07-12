@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { BFCacheFix } from "@/components/app/bfcache-fix";
+import { ScrollVisibility } from "@/components/app/scroll-visibility";
 import { appThemeColor } from "./theme-colors";
 import "./globals.css";
 
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <BFCacheFix />
+        <ScrollVisibility />
         {children}
       </body>
     </html>

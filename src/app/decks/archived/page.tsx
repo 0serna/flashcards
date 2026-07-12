@@ -27,11 +27,7 @@ export default async function ArchivedDecksPage() {
   );
 
   return (
-    <AppScreen
-      contentClassName="py-4"
-      signOutAction={signOutAction}
-      maxWidthClass="max-w-2xl"
-    >
+    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[{ label: "Home", href: "/" }, { label: "Archived decks" }]}
       />

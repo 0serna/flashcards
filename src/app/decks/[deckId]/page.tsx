@@ -51,11 +51,7 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const archiveAction = archiveDeckAction.bind(null, deck.id);
 
   return (
-    <AppScreen
-      contentClassName="py-4"
-      signOutAction={signOutAction}
-      maxWidthClass="max-w-2xl"
-    >
+    <AppScreen contentClassName="py-4" signOutAction={signOutAction}>
       <Breadcrumb
         items={[{ label: "Home", href: "/" }, { label: deck.name }]}
       />

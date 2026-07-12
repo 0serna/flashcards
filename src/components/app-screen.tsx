@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { Header } from "./app/header";
 import { NavigationHistoryTracker } from "./app/navigation-history-tracker";
 
+type AppScreenVariant = "fill" | "centered";
+
 type AppScreenProps = {
   children: React.ReactNode;
   contentClassName?: string;
@@ -12,38 +14,61 @@ type AppScreenProps = {
    * When provided, renders the shared authenticated header (logo + account
    * menu) at the top of the screen. Pass `signOutAction` from the auth
    * actions; the same action is used everywhere. Login and global error
-   * surfaces do not pass this prop, so they stay outside the shell.
+   * surfaces omit this prop so they stay outside the shell.
    */
   signOutAction?: () => void | Promise<void>;
   /**
-   * Override the default reading-width constraint. Defaults to `max-w-md`.
-   * List/detail screens can widen to `max-w-2xl` for better desktop density
-   * while forms and Study keep the narrower measure.
+   * Layout shape of the inner shell.
+   * - `fill` (default): header at the top, content fills the remaining
+   *   viewport. Use for authenticated screens.
+   * - `centered`: no header, content vertically and horizontally centered.
+   *   Use for login and error recovery surfaces.
    */
-  maxWidthClass?: string;
+  variant?: AppScreenVariant;
 };
 
+/**
+ * The single layout shell every screen renders inside.
+ *
+ * It enforces the same reading width, padding, and background across the
+ * app so current and future views stay aligned. The shell exposes a
+ * `variant` to opt into a centered surface (login, error) without opting
+ * out of the global constraints.
+ */
 export function AppScreen({
   children,
   contentClassName,
   signOutAction,
-  maxWidthClass = "max-w-md",
+  variant = "fill",
 }: AppScreenProps) {
+  const isCentered = variant === "centered";
+
   return (
-    <main className="min-h-svh bg-secondary/30 px-4 py-4 text-foreground">
+    <main className="flex min-h-svh flex-col bg-secondary/30 px-4 py-4 text-foreground">
       <div
+        data-app-shell="true"
         className={cn(
-          "mx-auto flex min-h-[calc(100svh-2rem)] w-full flex-col",
-          maxWidthClass,
+          "mx-auto flex w-full max-w-md flex-col",
+          isCentered
+            ? "min-h-svh items-center justify-center"
+            : "min-h-[calc(100svh-2rem)]",
         )}
       >
-        {signOutAction ? (
+        {signOutAction && !isCentered ? (
           <>
             <NavigationHistoryTracker />
             <Header signOutAction={signOutAction} />
           </>
         ) : null}
-        <div className={cn("flex min-h-0 flex-1 flex-col", contentClassName)}>
+        <div
+          data-app-content="true"
+          className={cn(
+            isCentered
+              ? "flex w-full flex-col"
+              : "flex min-h-0 flex-1 flex-col",
+            contentClassName,
+          )}
+        >
           {children}
         </div>
       </div>
