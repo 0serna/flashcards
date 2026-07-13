@@ -1,6 +1,6 @@
 .cardStage {
   perspective: 60rem;
-  animation: enterUp 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: enterUp 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .card {
@@ -136,7 +136,7 @@
   transform-origin: center;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  transition: transform 440ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
