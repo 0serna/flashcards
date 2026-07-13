@@ -41,11 +41,24 @@ jobs:
       - name: Migrate production Supabase platform resources
         run: npx supabase db push --db-url "$SUPABASE_MIGRATION_DATABASE_URL"
 
+      # Derive a unique opaque release identity for this deployment.
+      # The build embeds the value as `NEXT_PUBLIC_APP_RELEASE_ID`, the
+      # release endpoint returns it, and the client checks it on mount
+      # and on foreground return.
+      - name: Generate release identity
+        id: release
+        run: |
+          release_id="rel-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}"
+          echo "release_id=${release_id}" >> "$GITHUB_OUTPUT"
+          echo "release_id=${release_id}" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Pull Vercel production environment
         run: npx vercel pull --yes --environment=production
 
       - name: Build Vercel production artifact
         run: npx vercel build --prod
+        env:
+          NEXT_PUBLIC_APP_RELEASE_ID: ${{ steps.release.outputs.release_id }}
 
       - name: Deploy Vercel production artifact
         run: npx vercel deploy --prebuilt --prod

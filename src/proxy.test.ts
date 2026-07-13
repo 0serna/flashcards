@@ -39,4 +39,12 @@ describe("proxy", () => {
     expect(matcher.test("/manifest.webmanifest")).toBe(false);
     expect(matcher.test("/icon-192.png")).toBe(false);
   });
+
+  it("excludes the public release identity endpoint from session processing", () => {
+    // The release endpoint is public, returns no user data, and runs on
+    // every foreground check. Excluding it from the proxy keeps the
+    // hot path free of session lookups.
+    const matcher = matcherRegex();
+    expect(matcher.test("/api/release")).toBe(false);
+  });
 });

@@ -20,6 +20,10 @@ _Avoid_: browser back, chronological back, history navigation
 The root authenticated screen and terminal destination of upward navigation.
 _Avoid_: previous page, landing page
 
+**App update**:
+The replacement of the app release currently loaded on a device with the active production release whenever their identities differ, including after a production rollback.
+_Avoid_: upgrade, data migration, offline update
+
 **Deck**:
 A user-owned collection of cards grouped for study.
 _Avoid_: folder, set, stack
