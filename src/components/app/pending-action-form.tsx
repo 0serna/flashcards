@@ -1,43 +1,55 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
 
-import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
+import type { MutationOutcome } from "@/lib/mutations/outcome";
+import { ReliableForm } from "./reliable-form";
 
 type PendingActionFormProps = {
-  /**
-   * Server action to invoke when the form is submitted. The wrapper
-   * registers a pending-mutation signal before calling it so the
-   * authenticated history boundary can ignore browser Back until the
-   * action resolves. The signal is released automatically, even if the
-   * action throws.
-   */
-  action: (formData: FormData) => void | Promise<void>;
+  action: (
+    formData: FormData,
+  ) =>
+    | void
+    | MutationOutcome<{ id: string }>
+    | Promise<void | MutationOutcome<{ id: string }>>;
   children: ReactNode;
   className?: string;
+  successHref?: string;
 };
 
-/**
- * Client-side `<form>` wrapper that registers a pending-mutation signal
- * around a server action.
- *
- * Server components cannot set client-side navigation state directly, so
- * the archive/restore forms in the archived-decks and archived-cards
- * pages route through this wrapper. The signal is released in
- * `try/finally` semantics inside `runWithPendingMutation`, so a thrown
- * server action never leaves the boundary stuck in a "pending" state.
- */
 export function PendingActionForm({
   action,
   children,
   className,
+  successHref,
 }: PendingActionFormProps) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+
   return (
-    <form
-      action={(formData) => runWithPendingMutation(() => action(formData))}
+    <ReliableForm
+      action={async (formData) => {
+        setError(null);
+        const outcome = await action(formData);
+        if (outcome?.status === "rejected") {
+          setError(outcome.message);
+          return;
+        }
+        if (successHref) router.replace(successHref);
+        else router.refresh();
+      }}
+      onUnconfirmed={() =>
+        setError("We could not confirm this action. Try again safely.")
+      }
       className={className}
     >
       {children}
-    </form>
+      {error ? (
+        <p className="mt-2 text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </ReliableForm>
   );
 }

@@ -2,7 +2,9 @@ import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
-import { cards, decks } from "@/lib/db/schema";
+import { cards } from "@/lib/db/schema";
+import { isUniqueViolation } from "@/lib/db/errors";
+import { getOwnedActiveDeckRow } from "@/lib/decks/service";
 import {
   isCardImageMimeType,
   CARD_IMAGE_BUCKET,
@@ -11,6 +13,13 @@ import {
 import { extractImageVersion, type CardImageMetadata } from "./schema";
 
 export type CardImage = CardImageMetadata & { bytes: Blob };
+
+export class CardIdentityConflictError extends Error {
+  constructor() {
+    super("Card identity is unavailable");
+    this.name = "CardIdentityConflictError";
+  }
+}
 
 export class CardContentError extends Error {
   constructor(message: string) {
@@ -100,24 +109,6 @@ export function cardImageUrl(
 ): string | null {
   if (!imageVersion) return null;
   return `/api/decks/${card.deckId}/cards/${card.id}/image/${side}/v/${imageVersion}`;
-}
-
-async function getOwnedActiveDeckRow(
-  db: DrizzleDb,
-  userId: string,
-  deckId: string,
-) {
-  const rows = await db
-    .select()
-    .from(decks)
-    .where(
-      and(
-        eq(decks.userId, userId),
-        eq(decks.id, deckId),
-        isNull(decks.archivedAt),
-      ),
-    );
-  return rows[0] ?? null;
 }
 
 export async function signCardImages(
@@ -255,6 +246,7 @@ export async function resolveOwnedCardImage(
 }
 
 export type CreateCardInput = {
+  id?: string;
   front: { text: string | null; image: CardImage | null };
   back: { text: string | null; image: CardImage | null };
 };
@@ -269,7 +261,18 @@ export async function createCard(
   const deck = await getOwnedActiveDeckRow(db, userId, deckId);
   if (!deck) return null;
 
-  const cardId = randomUUID();
+  const cardId = input.id ?? randomUUID();
+  if (input.id) {
+    const existingRows = (await db
+      .select()
+      .from(cards)
+      .where(and(eq(cards.id, cardId), eq(cards.deckId, deckId)))) as CardRow[];
+    const existing = existingRows[0];
+    if (existing) {
+      return toCard(existing, await signCardImages(supabase, existing));
+    }
+  }
+
   const uploadedPaths: string[] = [];
   let committed = false;
 
@@ -304,11 +307,23 @@ export async function createCard(
     return toCard(inserted, await signCardImages(supabase, inserted));
   } catch (error) {
     if (!committed) await cleanupUploadedImages(supabase, uploadedPaths);
+    if (input.id) {
+      const racedRows = (await db
+        .select()
+        .from(cards)
+        .where(
+          and(eq(cards.id, cardId), eq(cards.deckId, deckId)),
+        )) as CardRow[];
+      const raced = racedRows[0];
+      if (raced) return toCard(raced, await signCardImages(supabase, raced));
+      if (isUniqueViolation(error)) throw new CardIdentityConflictError();
+    }
     throw error;
   }
 }
 
 export type UpdateCardInput = {
+  expectedUpdatedAt?: string;
   front?: { text?: string | null; image?: CardImage | null };
   back?: { text?: string | null; image?: CardImage | null };
 };
@@ -413,6 +428,9 @@ export async function updateCard(
         and(
           eq(cards.id, cardId),
           eq(cards.deckId, deckId),
+          ...(input.expectedUpdatedAt
+            ? [eq(cards.updatedAt, new Date(input.expectedUpdatedAt))]
+            : []),
           isNull(cards.archivedAt),
         ),
       )
@@ -457,7 +475,12 @@ export async function archiveCard(
       ),
     )
     .returning({ id: cards.id });
-  return rows.length > 0;
+  if (rows.length > 0) return true;
+  const existing = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(and(eq(cards.id, cardId), eq(cards.deckId, deckId)));
+  return existing.length > 0;
 }
 
 export async function restoreCard(
@@ -480,7 +503,12 @@ export async function restoreCard(
       ),
     )
     .returning({ id: cards.id });
-  return rows.length > 0;
+  if (rows.length > 0) return true;
+  const existing = await db
+    .select({ id: cards.id })
+    .from(cards)
+    .where(and(eq(cards.id, cardId), eq(cards.deckId, deckId)));
+  return existing.length > 0;
 }
 
 export async function countActiveCards(

@@ -3,6 +3,7 @@
 import { LogOut, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { ReliableForm } from "@/components/app/reliable-form";
 import { Button } from "@/components/ui/button";
 
 export function AccountMenu({
@@ -57,7 +58,7 @@ export function AccountMenu({
           aria-label="Account actions"
           className="absolute right-0 top-12 z-10 w-52 space-y-1 rounded-xl border border-border bg-background p-1 shadow-sm"
         >
-          <form action={signOutAction}>
+          <ReliableForm action={signOutAction}>
             <Button
               type="submit"
               variant="secondary"
@@ -66,7 +67,7 @@ export function AccountMenu({
               <LogOut aria-hidden="true" />
               Sign out
             </Button>
-          </form>
+          </ReliableForm>
         </div>
       ) : null}
     </div>

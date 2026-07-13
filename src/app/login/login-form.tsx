@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,25 @@ export function LoginForm({ authErrorMessage }: LoginFormProps = {}) {
     signInWithGoogle,
     initialState,
   );
+  const lockedRef = useRef(false);
+
+  useEffect(() => {
+    if (!pending) lockedRef.current = false;
+  }, [pending]);
 
   return (
-    <form action={action} className="flex w-full max-w-md flex-col gap-6">
+    <form
+      action={action}
+      className="flex w-full max-w-md flex-col gap-6"
+      aria-busy={pending || undefined}
+      onSubmit={(event) => {
+        if (lockedRef.current) {
+          event.preventDefault();
+          return;
+        }
+        lockedRef.current = true;
+      }}
+    >
       <div className="flex flex-col items-center gap-4 text-center">
         <Logo className="text-xl" />
         <div className="space-y-2">

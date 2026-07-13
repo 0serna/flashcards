@@ -62,6 +62,7 @@ export default async function StudyPage({
 
   const cards: StudyCardPayload[] = result.cards.map((card) => ({
     id: card.id,
+    schedulingVersion: card.schedulingVersion,
     deckId: card.deckId,
     front: {
       text: card.front.text,

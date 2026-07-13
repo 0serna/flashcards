@@ -39,7 +39,20 @@ export function ErrorRecovery({ error, unstable_retry }: ErrorRecoveryProps) {
       ) : null}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <Button onClick={() => unstable_retry()}>Try again</Button>
-        <form action="/auth/recover" method="post">
+        <form
+          action="/auth/recover"
+          method="post"
+          onSubmit={(event) => {
+            const form = event.currentTarget;
+            if (form.getAttribute("aria-busy") === "true") {
+              event.preventDefault();
+              return;
+            }
+            form.setAttribute("aria-busy", "true");
+            const button = form.querySelector("button");
+            if (button) button.disabled = true;
+          }}
+        >
           <Button className="w-full" type="submit" variant="outline">
             Sign out and return to login
           </Button>

@@ -3,19 +3,20 @@
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ViewTransition } from "react";
 
 import { PrivateCardImage } from "@/components/cards/private-card-image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
+import { useReliableAction } from "@/components/app/use-reliable-action";
 
 import { preloadUpcomingImages } from "./preload-study-images";
 import styles from "./study-session.module.css";
 
 export type StudyCardPayload = {
   id: string;
+  schedulingVersion: number;
   deckId: string;
   front: {
     text: string | null;
@@ -39,6 +40,8 @@ export type StudySessionProps = {
   submitRating: (
     cardId: string,
     rating: StudyRating,
+    reviewId?: string,
+    expectedReviewCount?: number,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
 };
 
@@ -77,6 +80,8 @@ export function StudySession({
   const [error, setError] = useState<string | null>(null);
   const [justRated, setJustRated] = useState<StudyRating | null>(null);
   const [endedEarly, setEndedEarly] = useState(false);
+  const reliableAction = useReliableAction();
+  const reviewIntentRef = useRef<{ cardId: string; id: string } | null>(null);
 
   const router = useRouter();
 
@@ -175,19 +180,40 @@ export function StudySession({
   const progressLabel = `Card ${index + 1} of ${total}`;
 
   async function handleRate(rating: StudyRating) {
-    if (pending) return;
+    if (pending || reliableAction.pending) return;
+    const intent =
+      reviewIntentRef.current?.cardId === current.id
+        ? reviewIntentRef.current
+        : { cardId: current.id, id: crypto.randomUUID() };
+    reviewIntentRef.current = intent;
     setPending(true);
     setError(null);
     setJustRated(rating);
-    const result = await runWithPendingMutation(() =>
-      submitRating(current.id, rating),
-    );
-    if (!result.ok) {
-      setError(result.error);
+    try {
+      const attempt = await reliableAction.run(() =>
+        submitRating(current.id, rating, intent.id, current.schedulingVersion),
+      );
+      if (!attempt) return;
+      if (attempt.status === "unconfirmed") {
+        setError("We could not confirm this answer. Try again safely.");
+        setPending(false);
+        setJustRated(null);
+        return;
+      }
+      const result = attempt.value;
+      if (!result.ok) {
+        setError(result.error);
+        setPending(false);
+        setJustRated(null);
+        return;
+      }
+    } catch {
+      setError("We could not confirm this answer. Try again safely.");
       setPending(false);
       setJustRated(null);
       return;
     }
+    reviewIntentRef.current = null;
     setStudied((value) => value + 1);
     setRatingCounts((counts) => ({
       ...counts,

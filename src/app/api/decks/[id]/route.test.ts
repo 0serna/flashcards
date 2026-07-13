@@ -121,17 +121,24 @@ describe("PATCH /api/decks/[id]", () => {
       updatedAt: "2024-02-01T00:00:00.000Z",
     };
     mocks.getAuthenticatedUser.mockResolvedValue(user);
-    mocks.updateDeck.mockResolvedValue(updated);
+    mocks.updateDeck.mockResolvedValue({ status: "updated", deck: updated });
 
     const response = await PATCH(
-      jsonRequest("PATCH", { name: "Renamed" }),
+      jsonRequest("PATCH", {
+        expectedUpdatedAt: "2024-01-01T00:00:00.000Z",
+        name: "Renamed",
+      }),
       routeParams,
     );
 
     expect(response.status).toBe(200);
-    expect(mocks.updateDeck).toHaveBeenCalledWith({}, user.id, deckId, {
-      name: "Renamed",
-    });
+    expect(mocks.updateDeck).toHaveBeenCalledWith(
+      {},
+      user.id,
+      deckId,
+      "2024-01-01T00:00:00.000Z",
+      { name: "Renamed" },
+    );
     await expect(response.json()).resolves.toEqual(updated);
   });
 
@@ -158,10 +165,13 @@ describe("PATCH /api/decks/[id]", () => {
 
   it("returns 404 when the deck is archived or unowned", async () => {
     mocks.getAuthenticatedUser.mockResolvedValue({ id: "u" });
-    mocks.updateDeck.mockResolvedValue(null);
+    mocks.updateDeck.mockResolvedValue({ status: "not-found" });
 
     const response = await PATCH(
-      jsonRequest("PATCH", { name: "x" }),
+      jsonRequest("PATCH", {
+        expectedUpdatedAt: "2024-01-01T00:00:00.000Z",
+        name: "x",
+      }),
       routeParams,
     );
 

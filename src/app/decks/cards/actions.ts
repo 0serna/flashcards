@@ -1,18 +1,22 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
+import { requireUserId } from "@/lib/auth/require-user";
 import { getDb } from "@/lib/db/client";
 import { cardDeckIdSchema, cardIdSchema } from "@/lib/cards/schema";
-import { getActiveDeck, getAuthenticatedUser } from "@/lib/decks/service";
+import { getActiveDeck } from "@/lib/decks/service";
 import {
   archiveCard,
   createCard,
+  CardIdentityConflictError,
+  getActiveCard,
   restoreCard,
   updateCard,
 } from "@/lib/cards/service";
 import { createClient } from "@/lib/supabase/server";
+import { confirmed, rejected } from "@/lib/mutations/outcome";
 import {
   parseCreateImage,
   parseText,
@@ -20,13 +24,6 @@ import {
 } from "@/lib/api/multipart";
 
 import type { CardImage } from "@/lib/cards/service";
-
-async function requireUserId() {
-  const supabase = await createClient();
-  const user = await getAuthenticatedUser(supabase);
-  if (!user) redirect("/login");
-  return user.id;
-}
 
 export async function createCardAction(
   deckId: string,
@@ -37,6 +34,10 @@ export async function createCardAction(
   const id = cardDeckIdSchema.parse(deckId);
   const deck = await getActiveDeck(getDb(), userId, id);
   if (!deck) notFound();
+
+  const intentId = cardIdSchema.safeParse(formData.get("intentId"));
+  if (!intentId.success)
+    return rejected("invalid", "Could not identify this card attempt.");
 
   const supabase = await createClient();
 
@@ -54,17 +55,24 @@ export async function createCardAction(
     throw new Error("Back must include text or an image");
   }
 
-  await createCard(getDb(), supabase, userId, id, {
-    front: { text: frontText ?? null, image: frontImage },
-    back: { text: backText ?? null, image: backImage },
-  });
+  let card;
+  try {
+    card = await createCard(getDb(), supabase, userId, id, {
+      id: intentId.data,
+      front: { text: frontText ?? null, image: frontImage },
+      back: { text: backText ?? null, image: backImage },
+    });
+  } catch (error) {
+    if (error instanceof CardIdentityConflictError) {
+      return rejected("invalid", "This card attempt could not be recovered.");
+    }
+    throw error;
+  }
+  if (!card) return rejected("not-found", "This deck is no longer available.");
 
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/archived`);
-  if (next === "new-card") {
-    redirect(`/decks/${id}/cards/new`, "replace");
-  }
-  redirect(`/decks/${id}`, "replace");
+  return confirmed({ id: card.id, next });
 }
 
 export async function updateCardAction(
@@ -101,16 +109,28 @@ export async function updateCardAction(
     else if (parsed !== null) back.image = parsed;
   }
 
+  const expectedUpdatedAt = formData.get("expectedUpdatedAt");
+  if (typeof expectedUpdatedAt !== "string" || !expectedUpdatedAt) {
+    return rejected("invalid", "Could not verify the card version.");
+  }
+
   const supabase = await createClient();
   const updated = await updateCard(getDb(), supabase, userId, id, card, {
+    expectedUpdatedAt,
     front: hasFrontText || hasFrontImage ? front : undefined,
     back: hasBackText || hasBackImage ? back : undefined,
   });
-  if (!updated) notFound();
+  if (!updated) {
+    const current = await getActiveCard(getDb(), supabase, userId, id, card);
+    return current
+      ? rejected("stale", "This card changed elsewhere. Reload and try again.")
+      : rejected("not-found", "This card is no longer available.");
+  }
 
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/${card}`);
   revalidatePath(`/decks/${id}/cards/archived`);
+  return confirmed({ id: card });
 }
 
 export async function archiveCardAction(deckId: string, cardId: string) {
@@ -119,11 +139,12 @@ export async function archiveCardAction(deckId: string, cardId: string) {
   const card = cardIdSchema.parse(cardId);
 
   const archived = await archiveCard(getDb(), userId, id, card);
-  if (!archived) notFound();
+  if (!archived)
+    return rejected("not-found", "This card is no longer available.");
 
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/archived`);
-  redirect(`/decks/${id}`, "replace");
+  return confirmed({ id: card });
 }
 
 export async function restoreCardAction(deckId: string, cardId: string) {
@@ -132,9 +153,10 @@ export async function restoreCardAction(deckId: string, cardId: string) {
   const card = cardIdSchema.parse(cardId);
 
   const restored = await restoreCard(getDb(), userId, id, card);
-  if (!restored) notFound();
+  if (!restored)
+    return rejected("not-found", "This card is no longer available.");
 
   revalidatePath(`/decks/${id}`);
   revalidatePath(`/decks/${id}/cards/archived`);
-  redirect(`/decks/${id}/cards/archived`, "replace");
+  return confirmed({ id: card });
 }

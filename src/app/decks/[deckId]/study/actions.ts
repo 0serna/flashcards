@@ -16,6 +16,8 @@ export async function submitRatingAction(
   deckId: string,
   cardId: string,
   rating: string,
+  reviewId?: string,
+  expectedReviewCount?: number,
 ): Promise<SubmitRatingResult> {
   if (!isStudyRating(rating)) {
     return {
@@ -33,9 +35,29 @@ export async function submitRatingAction(
   const id = cardDeckIdSchema.parse(deckId);
   const card = cardIdSchema.parse(cardId);
 
-  const result = await recordCardReview(getDb(), user.id, id, card, rating);
+  const mutation =
+    reviewId &&
+    cardIdSchema.safeParse(reviewId).success &&
+    Number.isInteger(expectedReviewCount)
+      ? { id: reviewId, expectedReviewCount: expectedReviewCount as number }
+      : undefined;
+  const result = await recordCardReview(
+    getDb(),
+    user.id,
+    id,
+    card,
+    rating,
+    new Date(),
+    mutation,
+  );
   if (!result.found) {
-    return { ok: false, error: "Card not found" };
+    return {
+      ok: false,
+      error:
+        result.reason === "stale"
+          ? "This card was already reviewed elsewhere."
+          : "Card not found",
+    };
   }
 
   revalidatePath(`/decks/${id}`);

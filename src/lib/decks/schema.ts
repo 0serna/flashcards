@@ -16,6 +16,7 @@ export const deckIdSchema = z.uuid();
 
 export const deckCreateSchema = z
   .object({
+    id: deckIdSchema,
     name: deckNameSchema,
     description: deckDescriptionSchema,
   })
@@ -23,14 +24,12 @@ export const deckCreateSchema = z
 
 export const deckUpdateSchema = z
   .object({
+    expectedUpdatedAt: z.iso.datetime(),
     name: deckNameSchema.optional(),
     description: deckDescriptionSchema,
   })
   .strict()
   .refine(
-    (value) =>
-      value.name !== undefined ||
-      value.description !== undefined ||
-      value.description === null,
+    (value) => value.name !== undefined || value.description !== undefined,
     { message: "At least one field must be provided" },
   );

@@ -46,7 +46,7 @@ export default async function ArchivedDecksPage() {
                     {count} {count === 1 ? "card" : "cards"}
                   </p>
                 </div>
-                <PendingActionForm action={restoreAction}>
+                <PendingActionForm action={restoreAction} successHref="/">
                   <Button
                     type="submit"
                     variant="secondary"

@@ -28,12 +28,28 @@ _Avoid_: folder, set, stack
 A study item inside a deck with a front prompt and a back answer; each side can contain text, an image, or both.
 _Avoid_: flashcard, note, question
 
+**Mutation intent**:
+A user's decision to make one persistent domain change, such as creating a card, archiving a deck, or recording one review answer. It may produce multiple submission attempts because of repeated input, retries, uncertain responses, or corrections after an error, but it applies the domain change at most once. The intent ends when the change succeeds or its form or interaction is closed or reset. Alternative post-success destinations, such as “Save” and “Save and add another,” belong to the same intent; “Save and add another” begins a new intent only after the prior one succeeds.
+_Avoid_: submission, request, click
+
+**Mutation attempt**:
+One technical submission made for a mutation intent and carrying that intent's opaque identifier; repeating an attempt does not represent another domain change unless the user starts a new mutation intent. Attempts may execute more than once technically, but they must converge on the same domain outcome and must not leave orphaned auxiliary resources. Distinct creation intents may legitimately produce cards with identical content. Once an attempt applies the change, that first confirmed result is authoritative and later attempts acknowledge it as success without silently changing it.
+_Avoid_: domain change, duplicate card, content-based duplicate
+
+**Mutation outcome**:
+The known result of a mutation intent: confirmed when the domain change was applied, rejected when it was definitively not applied, or unconfirmed when the client cannot determine either result. An unconfirmed outcome preserves the same intent so it can be retried safely.
+_Avoid_: treating every transport error as rejection, failed mutation when the result is unknown
+
+**Stale mutation**:
+A mutation intent based on a persistent version that another intent has already changed. Stale Card and Deck edits and stale Review answers are rejected rather than silently overwriting or advancing newer state; convergent Archive and Restore transitions do not conflict merely because their source view is old.
+_Avoid_: last write wins, duplicate attempt
+
 **Archived card**:
 A card removed from active study and the active card list without physically deleting its content or images; it can be restored from an archived view.
 _Avoid_: deleted card, trashed card, removed card
 
 **Review**:
-A study mode for cards whose scheduling state says they are due to be answered now.
+A study mode for cards whose scheduling state says they are due to be answered now. Each recorded answer applies to the scheduling version shown to the user; it is stale and must not change scheduling if another review has already advanced that version.
 _Avoid_: practice, quiz, test
 
 **Practice**:

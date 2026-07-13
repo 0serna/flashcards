@@ -103,6 +103,7 @@ describe("AppScreen + pending mutation signal", () => {
     const cards = [
       {
         id: "card-1",
+        schedulingVersion: 0,
         deckId: "abc",
         front: { text: "Hola", imageUrl: null },
         back: { text: "Hello", imageUrl: null },

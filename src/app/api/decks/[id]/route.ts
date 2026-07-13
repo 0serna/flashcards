@@ -44,9 +44,19 @@ export async function PATCH(
     );
   }
 
-  const deck = await updateDeck(getDb(), user.id, id, parsed.data);
-  if (!deck) return httpErrors.notFound();
-  return Response.json(deck);
+  const { expectedUpdatedAt, ...updates } = parsed.data;
+  const result = await updateDeck(
+    getDb(),
+    user.id,
+    id,
+    expectedUpdatedAt,
+    updates,
+  );
+  if (result.status === "not-found") return httpErrors.notFound();
+  if (result.status === "stale") {
+    return Response.json({ error: "Stale deck version" }, { status: 409 });
+  }
+  return Response.json(result.deck);
 }
 
 export async function DELETE(

@@ -96,11 +96,16 @@ describe("POST /api/decks", () => {
     mocks.createDeck.mockResolvedValue(created);
 
     const response = await POST(
-      jsonRequest({ name: "  Spanish basics  ", description: "Common words" }),
+      jsonRequest({
+        id: "11111111-1111-4111-8111-111111111111",
+        name: "  Spanish basics  ",
+        description: "Common words",
+      }),
     );
 
     expect(response.status).toBe(201);
     expect(mocks.createDeck).toHaveBeenCalledWith({}, user.id, {
+      id: "11111111-1111-4111-8111-111111111111",
       name: "Spanish basics",
       description: "Common words",
     });

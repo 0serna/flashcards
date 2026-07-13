@@ -1,8 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  archiveCard,
   createCard,
   deleteImage,
+  restoreCard,
   signCardImages,
   toCard,
   updateCard,
@@ -169,6 +171,49 @@ function image(name: string) {
 }
 
 describe("createCard", () => {
+  it("returns the first confirmed Card for a repeated identity without inserting", async () => {
+    const now = new Date("2024-01-01T00:00:00.000Z");
+    let selectCount = 0;
+    const insert = vi.fn();
+    const row = {
+      id: "11111111-1111-4111-8111-111111111111",
+      deckId: "deck-1",
+      frontText: "First front",
+      frontImagePath: null,
+      backText: "First back",
+      backImagePath: null,
+      createdAt: now,
+      updatedAt: now,
+      archivedAt: null,
+    };
+    const db = {
+      select: () => ({
+        from: () => ({
+          where: async () =>
+            selectCount++ === 0
+              ? [{ id: "deck-1", userId: "user-1", archivedAt: null }]
+              : [row],
+        }),
+      }),
+      insert,
+    } as never;
+
+    const card = await createCard(
+      db,
+      createMockSupabase(),
+      "user-1",
+      "deck-1",
+      {
+        id: row.id,
+        front: { text: "Changed front", image: null },
+        back: { text: "Changed back", image: null },
+      },
+    );
+
+    expect(card?.front.text).toBe("First front");
+    expect(insert).not.toHaveBeenCalled();
+  });
+
   it("creates a card when the back side has only an image", async () => {
     let insertedBackImagePath: unknown = null;
     const now = new Date("2024-01-01T00:00:00.000Z");
@@ -277,6 +322,36 @@ describe("createCard", () => {
     expect(supabaseState.removals).toEqual([
       { paths: supabaseState.uploads.map((upload) => upload.path) },
     ]);
+  });
+});
+
+describe("Card state transitions", () => {
+  function repeatedTransitionDb() {
+    let selectCount = 0;
+    return {
+      select: () => ({
+        from: () => ({
+          where: async () =>
+            selectCount++ === 0
+              ? [{ id: "deck-1", userId: "user-1", archivedAt: null }]
+              : [{ id: "card-1" }],
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({ returning: async () => [] }),
+        }),
+      }),
+    } as never;
+  }
+
+  it("confirms repeated Archive and Restore attempts", async () => {
+    await expect(
+      archiveCard(repeatedTransitionDb(), "user-1", "deck-1", "card-1"),
+    ).resolves.toBe(true);
+    await expect(
+      restoreCard(repeatedTransitionDb(), "user-1", "deck-1", "card-1"),
+    ).resolves.toBe(true);
   });
 });
 

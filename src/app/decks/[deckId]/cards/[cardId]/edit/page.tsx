@@ -55,6 +55,7 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
         cancelHref={`/decks/${deck.id}`}
         submitLabel="Save changes"
         initial={{
+          updatedAt: card.updatedAt,
           front: {
             text: card.front.text ?? "",
             imageUrl: cardImageUrl(card, "front", card.front.imageVersion),

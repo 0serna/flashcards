@@ -487,6 +487,75 @@ describe("recordCardReview", () => {
     });
   });
 
+  it("uses the preassigned Review identity and rejects a stale scheduling version", async () => {
+    const card: FakeRow = {
+      id: "c1",
+      deckId: "d1",
+      frontText: "f",
+      frontImagePath: null,
+      backText: "b",
+      backImagePath: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      archivedAt: null,
+      dueAt: new Date("2024-01-01T00:00:00.000Z"),
+      easeFactor: DEFAULT_EASE_FACTOR,
+      reviewCount: 2,
+      intervalMinutes: 10,
+    };
+    const { db, insertCalls, updateCalls } = makeDb({ deck, cards: [card] });
+
+    const stale = await recordCardReview(
+      db as never,
+      "u1",
+      "d1",
+      "c1",
+      "remembered",
+      new Date("2024-01-08T00:00:00.000Z"),
+      {
+        id: "11111111-1111-4111-8111-111111111111",
+        expectedReviewCount: 1,
+      },
+    );
+
+    expect(stale).toEqual({ found: false, reason: "stale" });
+    expect(insertCalls).toHaveLength(0);
+    expect(updateCalls).toHaveLength(0);
+  });
+
+  it("persists the preassigned Review identity for a current version", async () => {
+    const card: FakeRow = {
+      id: "c1",
+      deckId: "d1",
+      frontText: "f",
+      frontImagePath: null,
+      backText: "b",
+      backImagePath: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      archivedAt: null,
+      dueAt: new Date("2024-01-01T00:00:00.000Z"),
+      easeFactor: DEFAULT_EASE_FACTOR,
+      reviewCount: 2,
+      intervalMinutes: 10,
+    };
+    const { db, insertCalls } = makeDb({ deck, cards: [card] });
+    const reviewId = "11111111-1111-4111-8111-111111111111";
+
+    const result = await recordCardReview(
+      db as never,
+      "u1",
+      "d1",
+      "c1",
+      "remembered",
+      new Date("2024-01-08T00:00:00.000Z"),
+      { id: reviewId, expectedReviewCount: 2 },
+    );
+
+    expect(result.found).toBe(true);
+    expect(insertCalls[0]).toMatchObject({ id: reviewId });
+  });
+
   it("rolls back when the review insert fails", async () => {
     const card: FakeRow = {
       id: "c1",

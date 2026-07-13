@@ -6,13 +6,17 @@ import { useEffect, useRef, useState } from "react";
 
 import { ArchiveDeckForm } from "@/components/decks/archive-deck-form";
 import { Button } from "@/components/ui/button";
+import type { MutationOutcome } from "@/lib/mutations/outcome";
 
 export function DeckActionsMenu({
   deckId,
   archiveAction,
 }: {
   deckId: string;
-  archiveAction: () => void | Promise<void>;
+  archiveAction: () =>
+    | void
+    | MutationOutcome<{ id: string }>
+    | Promise<void | MutationOutcome<{ id: string }>>;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);

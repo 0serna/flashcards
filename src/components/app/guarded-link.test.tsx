@@ -9,10 +9,15 @@ import {
   isFormDirty,
   markFormDirty,
 } from "./dirty-form-store";
+import {
+  __resetPendingMutationsForTests,
+  runWithPendingMutation,
+} from "@/lib/navigation/pending-mutations";
 
 afterEach(() => {
   cleanup();
   __resetDirtyFormStoreForTests();
+  __resetPendingMutationsForTests();
   vi.restoreAllMocks();
 });
 
@@ -131,6 +136,21 @@ describe("GuardedLink", () => {
 
     expect(confirm).toHaveBeenCalledOnce();
     expect(isFormDirty()).toBe(true);
+  });
+
+  it("blocks navigation while a mutation is pending", () => {
+    const onClick = vi.fn();
+    void runWithPendingMutation(() => new Promise<void>(() => undefined));
+
+    render(
+      <GuardedLink href="/destination" onClick={onClick} data-testid="link">
+        Go
+      </GuardedLink>,
+    );
+
+    screen.getByTestId("link").click();
+
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it("bypasses the guard when bypassDirtyCheck is set", async () => {

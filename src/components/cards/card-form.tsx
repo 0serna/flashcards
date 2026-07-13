@@ -10,7 +10,8 @@ import { markFormClean } from "@/components/app/dirty-form-store";
 import { getPreviousAppPath } from "@/components/app/navigation-history-store";
 import { useDirtyFormTracker } from "@/components/app/use-dirty-form-tracker";
 import { PrivateCardImage } from "@/components/cards/private-card-image";
-import { runWithPendingMutation } from "@/lib/navigation/pending-mutations";
+import { useReliableAction } from "@/components/app/use-reliable-action";
+import type { MutationOutcome } from "@/lib/mutations/outcome";
 import { Button } from "@/components/ui/button";
 import { FormActions, FormSurface } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
@@ -29,11 +30,18 @@ type SideState = {
 };
 
 export type CardFormInitial = {
+  updatedAt?: string;
   front: { text: string; imageUrl: string | null };
   back: { text: string; imageUrl: string | null };
 };
 
-type FormAction = (formData: FormData) => void | Promise<void>;
+type CardMutationValue = { id: string; next?: "deck" | "new-card" };
+type FormAction = (
+  formData: FormData,
+) =>
+  | void
+  | MutationOutcome<CardMutationValue>
+  | Promise<void | MutationOutcome<CardMutationValue>>;
 
 type CardFormProps = {
   mode: "create" | "edit";
@@ -76,6 +84,8 @@ export function CardForm({
   const [errors, setErrors] = useState<{ front?: string; back?: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [intentId, setIntentId] = useState(() => crypto.randomUUID());
+  const reliableAction = useReliableAction();
   const formRef = useDirtyFormTracker();
   const router = useRouter();
 
@@ -84,7 +94,7 @@ export function CardForm({
   async function submitWithOptimizedImages(
     selectedAction: FormAction,
     formData: FormData,
-  ): Promise<boolean> {
+  ): Promise<MutationOutcome<CardMutationValue> | void | false> {
     if (front.removeImage) {
       formData.delete("frontImage");
       formData.append("frontImage", "clear");
@@ -94,12 +104,29 @@ export function CardForm({
       formData.append("backImage", "clear");
     }
 
+    formData.set("intentId", intentId);
+    if (edit && initial?.updatedAt) {
+      formData.set("expectedUpdatedAt", initial.updatedAt);
+    }
+
     try {
-      await runWithPendingMutation(async () => {
+      const attempt = await reliableAction.run(async () => {
         const optimized = await optimizeFormDataImages(formData);
-        await selectedAction(optimized);
+        return await selectedAction(optimized);
       });
-      return true;
+      if (!attempt) return false;
+      if (attempt.status === "unconfirmed") {
+        setSubmitError(
+          "We could not confirm whether this was saved. Try again safely.",
+        );
+        return false;
+      }
+      return (
+        attempt.value ?? {
+          status: "confirmed" as const,
+          value: { id: intentId },
+        }
+      );
     } catch (error) {
       if (error instanceof FormImageError) {
         setErrors({ [error.side]: error.message });
@@ -116,25 +143,33 @@ export function CardForm({
       action={async (formData) => {
         setSubmitError(null);
         try {
-          const ok = await submitWithOptimizedImages(action, formData);
-          if (edit && ok) {
+          const outcome = await submitWithOptimizedImages(action, formData);
+          if (!outcome) return;
+          if (outcome.status === "rejected") {
+            setSubmitError(outcome.message);
             setPendingAction(null);
-            markFormClean();
-            setSuccess(true);
-            await new Promise((resolve) => setTimeout(resolve, 800));
-            if (getPreviousAppPath() === cancelHref) {
-              router.back();
-            } else {
-              router.replace(cancelHref);
-            }
+            return;
           }
-          // create mode: server redirect handles navigation on success
+          setPendingAction(null);
+          markFormClean();
+          if (!edit) {
+            router.replace(cancelHref);
+            return;
+          }
+          setSuccess(true);
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          if (getPreviousAppPath() === cancelHref) {
+            router.back();
+          } else {
+            router.replace(cancelHref);
+          }
         } catch {
           setSubmitError(
             edit
               ? "Could not save the card. Try again."
               : "Could not create the card. Try again.",
           );
+        } finally {
           setPendingAction(null);
         }
         return undefined;
@@ -148,8 +183,17 @@ export function CardForm({
           return;
         }
 
+        if (reliableAction.pending) {
+          event.preventDefault();
+          return;
+        }
         setSubmitError(null);
-        setPendingAction("save");
+        setPendingAction(
+          submitter instanceof HTMLElement &&
+            submitter.dataset.formAction === "add-another"
+            ? "add-another"
+            : "save",
+        );
         const nextErrors: { front?: string; back?: string } = {};
         if (!sideHasContent(front))
           nextErrors.front = "Front needs text or an image.";
@@ -195,7 +239,7 @@ export function CardForm({
         <Button
           type="submit"
           className="w-full sm:w-auto"
-          disabled={pendingAction !== null}
+          disabled={pendingAction !== null || reliableAction.pending}
         >
           {pendingAction === "save"
             ? "Saving…"
@@ -210,15 +254,31 @@ export function CardForm({
               setSubmitError(null);
               setPendingAction("add-another");
               try {
-                await submitWithOptimizedImages(alternativeAction, formData);
+                const outcome = await submitWithOptimizedImages(
+                  alternativeAction,
+                  formData,
+                );
+                if (!outcome) return;
+                if (outcome.status === "rejected") {
+                  setSubmitError(outcome.message);
+                  return;
+                }
+                markFormClean();
+                setFront({ text: "", imageUrl: null, removeImage: false });
+                setBack({ text: "", imageUrl: null, removeImage: false });
+                setIntentId(crypto.randomUUID());
+                setErrors({});
+                setPendingAction(null);
               } catch {
                 setSubmitError("Could not create the card. Try again.");
+              } finally {
                 setPendingAction(null);
               }
             }}
             variant="secondary"
+            data-form-action="add-another"
             className="w-full sm:w-auto"
-            disabled={pendingAction !== null}
+            disabled={pendingAction !== null || reliableAction.pending}
           >
             {pendingAction === "add-another"
               ? "Saving and preparing another…"
@@ -236,7 +296,23 @@ export function CardForm({
             formAction={async (formData) => {
               setPendingAction("archive");
               try {
-                await runWithPendingMutation(() => archiveAction(formData));
+                const attempt = await reliableAction.run(() =>
+                  archiveAction(formData),
+                );
+                if (!attempt) return;
+                if (attempt.status === "unconfirmed") {
+                  setSubmitError(
+                    "We could not confirm this action. Try again safely.",
+                  );
+                  return;
+                }
+                const outcome = attempt.value;
+                if (outcome?.status === "rejected") {
+                  setSubmitError(outcome.message);
+                  return;
+                }
+                markFormClean();
+                router.replace(cancelHref);
               } finally {
                 setPendingAction(null);
               }
@@ -244,7 +320,7 @@ export function CardForm({
             variant="destructive"
             className="w-full sm:w-auto"
             data-form-action="archive"
-            disabled={pendingAction !== null}
+            disabled={pendingAction !== null || reliableAction.pending}
           >
             Archive
           </Button>

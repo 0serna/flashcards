@@ -37,19 +37,23 @@ describe("deckDescriptionSchema", () => {
 });
 
 describe("deckCreateSchema", () => {
+  const id = "11111111-1111-4111-8111-111111111111";
+
   it("accepts a valid payload with description", () => {
     const result = deckCreateSchema.parse({
+      id,
       name: "  Spanish basics  ",
       description: "  Common words  ",
     });
     expect(result).toEqual({
+      id,
       name: "Spanish basics",
       description: "Common words",
     });
   });
 
   it("accepts a payload without a description", () => {
-    const result = deckCreateSchema.parse({ name: "Biology" });
+    const result = deckCreateSchema.parse({ id, name: "Biology" });
     expect(result.description).toBeUndefined();
   });
 
@@ -65,16 +69,21 @@ describe("deckCreateSchema", () => {
 });
 
 describe("deckUpdateSchema", () => {
+  const expectedUpdatedAt = "2024-01-01T00:00:00.000Z";
+
   it("accepts a name-only update", () => {
-    expect(deckUpdateSchema.parse({ name: "Renamed" })).toEqual({
+    expect(
+      deckUpdateSchema.parse({ expectedUpdatedAt, name: "Renamed" }),
+    ).toEqual({
+      expectedUpdatedAt,
       name: "Renamed",
     });
   });
 
   it("accepts a description-only update", () => {
-    expect(deckUpdateSchema.parse({ description: "Updated" })).toEqual({
-      description: "Updated",
-    });
+    expect(
+      deckUpdateSchema.parse({ expectedUpdatedAt, description: "Updated" }),
+    ).toEqual({ expectedUpdatedAt, description: "Updated" });
   });
 
   it("rejects an empty update", () => {

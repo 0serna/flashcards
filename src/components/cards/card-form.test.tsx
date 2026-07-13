@@ -13,12 +13,14 @@ vi.mock("next/navigation", () => ({
 
 import { __resetDirtyFormStoreForTests } from "@/components/app/dirty-form-store";
 import { __resetNavigationHistoryForTests } from "@/components/app/navigation-history-store";
+import { __resetPendingMutationsForTests } from "@/lib/navigation/pending-mutations";
 import { CardForm } from "./card-form";
 
 afterEach(() => {
   cleanup();
   __resetDirtyFormStoreForTests();
   __resetNavigationHistoryForTests();
+  __resetPendingMutationsForTests();
   router.back.mockReset();
   router.replace.mockReset();
   vi.restoreAllMocks();
@@ -28,13 +30,14 @@ afterEach(() => {
 beforeEach(() => {
   __resetDirtyFormStoreForTests();
   __resetNavigationHistoryForTests();
+  __resetPendingMutationsForTests();
 });
 
 describe("CardForm", () => {
   it("shows which save action is in progress when saving and adding another", async () => {
     const user = userEvent.setup();
     const action = vi.fn();
-    const alternativeAction = vi.fn();
+    const alternativeAction = vi.fn(() => new Promise<void>(() => undefined));
 
     render(
       <CardForm
@@ -192,6 +195,107 @@ describe("CardForm", () => {
     await waitFor(() => expect(action).toHaveBeenCalledOnce());
     const submitted = action.mock.calls[0]?.[0] as FormData;
     expect(submitted.getAll("frontImage")).toEqual(["clear"]);
+  });
+
+  it("reuses one Card identity after an unconfirmed creation attempt", async () => {
+    const user = userEvent.setup();
+    const action = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("connection lost"))
+      .mockResolvedValueOnce({
+        status: "confirmed",
+        value: { id: "confirmed-card" },
+      });
+
+    render(
+      <CardForm
+        mode="create"
+        action={action}
+        cancelHref="/decks/deck-1"
+        submitLabel="Save card"
+      />,
+    );
+
+    await user.type(screen.getByRole("textbox", { name: "Front" }), "front");
+    await user.type(screen.getByRole("textbox", { name: "Back" }), "back");
+    await user.click(screen.getByRole("button", { name: /save card/i }));
+    await screen.findByRole("alert");
+    await user.click(screen.getByRole("button", { name: /save card/i }));
+
+    await waitFor(() => expect(action).toHaveBeenCalledTimes(2));
+    const first = action.mock.calls[0]?.[0] as FormData;
+    const second = action.mock.calls[1]?.[0] as FormData;
+    expect(first.get("intentId")).toBe(second.get("intentId"));
+  });
+
+  it("allows retrying Save and add another after a rejected outcome", async () => {
+    const user = userEvent.setup();
+    const alternativeAction = vi.fn().mockResolvedValue({
+      status: "rejected",
+      reason: "invalid",
+      message: "Could not save this card.",
+    });
+
+    render(
+      <CardForm
+        mode="create"
+        action={vi.fn()}
+        alternativeAction={alternativeAction}
+        cancelHref="/decks/deck-1"
+        submitLabel="Save card"
+      />,
+    );
+
+    await user.type(screen.getByRole("textbox", { name: "Front" }), "front");
+    await user.type(screen.getByRole("textbox", { name: "Back" }), "back");
+    await user.click(
+      screen.getByRole("button", { name: /save and add another/i }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not save this card.",
+    );
+    expect(
+      screen.getByRole("button", { name: /save and add another/i }),
+    ).toBeEnabled();
+  });
+
+  it("starts a new Card identity only after Save and add another confirms", async () => {
+    const user = userEvent.setup();
+    const alternativeAction = vi.fn().mockResolvedValue({
+      status: "confirmed",
+      value: { id: "first-card", next: "new-card" },
+    });
+
+    render(
+      <CardForm
+        mode="create"
+        action={vi.fn()}
+        alternativeAction={alternativeAction}
+        cancelHref="/decks/deck-1"
+        submitLabel="Save card"
+      />,
+    );
+
+    await user.type(screen.getByRole("textbox", { name: "Front" }), "one");
+    await user.type(screen.getByRole("textbox", { name: "Back" }), "first");
+    await user.click(
+      screen.getByRole("button", { name: /save and add another/i }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: "Front" })).toHaveValue(""),
+    );
+
+    await user.type(screen.getByRole("textbox", { name: "Front" }), "two");
+    await user.type(screen.getByRole("textbox", { name: "Back" }), "second");
+    await user.click(
+      screen.getByRole("button", { name: /save and add another/i }),
+    );
+
+    await waitFor(() => expect(alternativeAction).toHaveBeenCalledTimes(2));
+    const first = alternativeAction.mock.calls[0]?.[0] as FormData;
+    const second = alternativeAction.mock.calls[1]?.[0] as FormData;
+    expect(first.get("intentId")).not.toBe(second.get("intentId"));
   });
 
   it("shows inline validation when a side has no text or image", async () => {

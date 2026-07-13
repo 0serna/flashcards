@@ -1,9 +1,17 @@
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import type { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { decks } from "@/lib/db/schema";
+import { isUniqueViolation } from "@/lib/db/errors";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseClient>>;
 type DrizzleDb = ReturnType<typeof import("@/lib/db/client").getDb>;
+
+export class DeckIdentityConflictError extends Error {
+  constructor() {
+    super("Deck identity is unavailable");
+    this.name = "DeckIdentityConflictError";
+  }
+}
 
 export type Deck = {
   id: string;
@@ -54,6 +62,24 @@ export async function hasArchivedDecks(db: DrizzleDb, userId: string) {
   return rows.length > 0;
 }
 
+export async function getOwnedActiveDeckRow(
+  db: DrizzleDb,
+  userId: string,
+  deckId: string,
+) {
+  const rows = await db
+    .select()
+    .from(decks)
+    .where(
+      and(
+        eq(decks.userId, userId),
+        eq(decks.id, deckId),
+        isNull(decks.archivedAt),
+      ),
+    );
+  return rows[0] ?? null;
+}
+
 export async function getActiveDeck(db: DrizzleDb, userId: string, id: string) {
   const rows = await db
     .select()
@@ -68,23 +94,35 @@ export async function getActiveDeck(db: DrizzleDb, userId: string, id: string) {
 export async function createDeck(
   db: DrizzleDb,
   userId: string,
-  data: { name: string; description?: string },
+  data: { id: string; name: string; description?: string },
 ) {
-  const rows = await db
-    .insert(decks)
-    .values({
-      userId,
-      name: data.name,
-      description: data.description ?? null,
-    })
-    .returning();
-  return toDeck(rows[0]);
+  const existing = await getOwnedDeckById(db, userId, data.id);
+  if (existing) return existing;
+
+  try {
+    const rows = await db
+      .insert(decks)
+      .values({
+        id: data.id,
+        userId,
+        name: data.name,
+        description: data.description ?? null,
+      })
+      .returning();
+    return toDeck(rows[0]);
+  } catch (error) {
+    const raced = await getOwnedDeckById(db, userId, data.id);
+    if (raced) return raced;
+    if (isUniqueViolation(error)) throw new DeckIdentityConflictError();
+    throw error;
+  }
 }
 
 export async function updateDeck(
   db: DrizzleDb,
   userId: string,
   id: string,
+  expectedUpdatedAt: string,
   data: { name?: string; description?: string },
 ) {
   const updates: { name?: string; description?: string; updatedAt: Date } = {
@@ -96,11 +134,21 @@ export async function updateDeck(
     .update(decks)
     .set(updates)
     .where(
-      and(eq(decks.userId, userId), eq(decks.id, id), isNull(decks.archivedAt)),
+      and(
+        eq(decks.userId, userId),
+        eq(decks.id, id),
+        eq(decks.updatedAt, new Date(expectedUpdatedAt)),
+        isNull(decks.archivedAt),
+      ),
     )
     .returning();
   const row = rows[0];
-  return row ? toDeck(row) : null;
+  if (row) return { status: "updated" as const, deck: toDeck(row) };
+
+  const current = await getActiveDeck(db, userId, id);
+  return current
+    ? { status: "stale" as const, deck: current }
+    : { status: "not-found" as const };
 }
 
 export async function archiveDeck(db: DrizzleDb, userId: string, id: string) {
@@ -111,7 +159,9 @@ export async function archiveDeck(db: DrizzleDb, userId: string, id: string) {
       and(eq(decks.userId, userId), eq(decks.id, id), isNull(decks.archivedAt)),
     )
     .returning({ id: decks.id });
-  return rows.length > 0;
+  if (rows.length > 0) return true;
+  const existing = await getOwnedDeckById(db, userId, id);
+  return existing !== null;
 }
 
 export async function restoreDeck(db: DrizzleDb, userId: string, id: string) {
@@ -126,7 +176,23 @@ export async function restoreDeck(db: DrizzleDb, userId: string, id: string) {
       ),
     )
     .returning({ id: decks.id });
-  return rows.length > 0;
+  if (rows.length > 0) return true;
+  const existing = await getOwnedDeckById(db, userId, id);
+  return existing !== null;
+}
+
+async function getOwnedDeckById(
+  db: DrizzleDb,
+  userId: string,
+  id: string,
+): Promise<Deck | null> {
+  const rows = await db
+    .select()
+    .from(decks)
+    .where(and(eq(decks.userId, userId), eq(decks.id, id)))
+    .limit(1);
+  const row = rows[0];
+  return row ? toDeck(row) : null;
 }
 
 export async function getAuthenticatedUser(supabase: SupabaseClient) {

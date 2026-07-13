@@ -22,12 +22,14 @@ vi.mock("./preload-study-images", async (importOriginal) => {
 const cards: StudyCardPayload[] = [
   {
     id: "card-1",
+    schedulingVersion: 4,
     deckId: "deck-1",
     front: { text: "Hola", imageUrl: null },
     back: { text: "Hello", imageUrl: null },
   },
   {
     id: "card-2",
+    schedulingVersion: 7,
     deckId: "deck-1",
     front: { text: "Adiós", imageUrl: null },
     back: { text: "Goodbye", imageUrl: null },
@@ -113,6 +115,31 @@ describe("StudySession", () => {
     expect(
       screen.getByRole("button", { name: /show front/i }),
     ).toBeInTheDocument();
+  });
+
+  it("submits the Card scheduling version with a stable Review identity", async () => {
+    const user = userEvent.setup();
+    const submitRating = vi.fn().mockResolvedValue({ ok: true });
+
+    render(
+      <StudySession
+        mode="review"
+        deckId="deck-1"
+        deckName="Spanish Basics"
+        initialCards={cards}
+        submitRating={submitRating}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /show back/i }));
+    await user.click(screen.getByRole("button", { name: /i knew it/i }));
+
+    expect(submitRating).toHaveBeenCalledWith(
+      "card-1",
+      "remembered",
+      expect.any(String),
+      4,
+    );
   });
 
   it("summarizes studied cards by rating", async () => {
@@ -275,12 +302,14 @@ describe("StudySession", () => {
     const imageCards: StudyCardPayload[] = [
       {
         id: "card-1",
+        schedulingVersion: 4,
         deckId: "deck-1",
         front: { text: null, imageUrl: "/img/c1-front", imageVersion: "v1" },
         back: { text: null, imageUrl: "/img/c1-back", imageVersion: "v1" },
       },
       {
         id: "card-2",
+        schedulingVersion: 7,
         deckId: "deck-1",
         front: { text: null, imageUrl: "/img/c2-front", imageVersion: "v2" },
         back: { text: null, imageUrl: "/img/c2-back", imageVersion: "v2" },

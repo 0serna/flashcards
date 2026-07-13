@@ -107,7 +107,7 @@ describe("DeckForm dirty-form behavior", () => {
     await user.click(screen.getByRole("button", { name: /save changes/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Could not save the deck. Try again.",
+      "We could not confirm whether this was saved. Try again safely.",
     );
     expect(router.back).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe("DeckForm dirty-form behavior", () => {
     await user.click(screen.getByRole("button", { name: /create deck/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Could not create the deck. Try again.",
+      "We could not confirm whether this was saved. Try again safely.",
     );
   });
 

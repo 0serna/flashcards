@@ -66,7 +66,10 @@ export default async function ArchivedCardsPage({
                     {card.back.text ?? "Image only"}
                   </p>
                 </div>
-                <PendingActionForm action={restoreAction}>
+                <PendingActionForm
+                  action={restoreAction}
+                  successHref={`/decks/${deck.id}/cards/archived`}
+                >
                   <Button
                     type="submit"
                     variant="secondary"

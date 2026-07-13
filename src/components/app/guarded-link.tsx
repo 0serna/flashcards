@@ -3,6 +3,8 @@
 import Link, { type LinkProps } from "next/link";
 import type React from "react";
 
+import { isPendingMutation } from "@/lib/navigation/pending-mutations";
+
 import {
   isFormDirty,
   markFormClean,
@@ -38,6 +40,10 @@ export function GuardedLink({
   ...rest
 }: GuardedLinkProps) {
   function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (isPendingMutation()) {
+      event.preventDefault();
+      return;
+    }
     if (!bypassDirtyCheck && isFormDirty()) {
       const confirmed = window.confirm(message);
       if (!confirmed) {
